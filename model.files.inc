@@ -84,7 +84,7 @@ class contentFile extends db{
         }
         $tf->createForm('', 'post',  'content_file', '', 'multipart/form-data',  $caption);
     }
-    
+
     // {{{ insertModuleRelease()
     /**
      * method for inserting a module into the database
@@ -171,10 +171,10 @@ class contentFile extends db{
         //$download_str = lang::translate('Download File');
 
         if (!empty($rows)){
-            $str.="<p><hr />" . lang::translate('Files') . "</p>\n";
+            $str.="<p>" . lang::translate('Files') . "</p>\n";
         }
         foreach ($rows as $key => $val){
-            
+
             $str.= "<p>";
             $str.= "<a href=\"" . $this->basePath . "/download/$id/$val[id]/$val[title]\">$val[title]</a>";
             if (session::isAdmin()){
@@ -283,8 +283,8 @@ class contentFile extends db{
         }
         $this->viewFileForm('delete', $this->fileId);
     }
-    
-    public function viewFileFormUpdate(){        
+
+    public function viewFileFormUpdate(){
         if (isset($_POST['submit'])){
             $this->validateUpdate();
             if (!isset($this->errors)){
