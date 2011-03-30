@@ -18,20 +18,16 @@ include_once "mySqlForm.php";
  *
  * @package content
  */
-class contentFile extends db{
+class files extends db {
 
-    /** @var    array   array holding errors */
+
     public $errors = null;
-    /** @var    array   array holding   status messages */
     public $status = null;
-    /** @var    int     holding id of article connected to */
-    public $id;
-    /** @var    int     holding file id */
+    public $parent_id;
     public $fileId;
     public $maxsize = 2000000; // 2 mb max size
     public $options = array();
-    public $fileTable = 'content_file';
-    public $basePath = '/content/files';
+    public $fileTable = 'files';
 
     // {{{ function __construct()
     /**
@@ -40,13 +36,22 @@ class contentFile extends db{
      */
     function __construct($options = null){
         $uri = URI::getInstance();
-        $this->id = $uri->fragment(3);
-        $this->fileId = $uri->fragment(4);
+        //$this->parent_id = $options['parent_id'];
+        //$this->fileId = $options['id'];
         if (isset($options)){
             $this->options = $options;
         }
     }
     // }}}
+    // used when invoking module as submodule.
+    public static function subModuleAdminOptionLink ($options){
+        $get = http_build_query($options);
+        $url = '/files/add?' . $get;
+        $title = 'Add File';
+        return html::createLink($url, $title);
+    }
+
+
     // {{{ viewFilesForm($method, $id = null, $values = array(), $caption = null)
    /**
     * method for creating a form for insert, update and deleting entries
@@ -94,7 +99,8 @@ class contentFile extends db{
      */
     public function insertFile () {
         $values = $this->prepareToPost();
-        $values['parent_id'] = $this->id;
+        $values['parent_id'] = $this->options['parent_id'];
+        $values['reference'] = $this->options['reference'];
 
         $options['filename'] = 'file';
         $options['maxsize'] = $this->maxsize;
@@ -115,9 +121,6 @@ class contentFile extends db{
      * method for validating a post before insert
      */
     public function validateInsert($mode = false){
-        //if (strlen($_POST['abstract']) < 7 ){
-        //    $this->errors['abstract'] = lang::translate('Your release needs an abstract of at least 14 chars');
-        //}
         if (empty($_FILES['file']['name'])){
             $this->errors[] = lang::translate('No file specified');
         } else {
@@ -137,9 +140,6 @@ class contentFile extends db{
      * method for validating a post before insert
      */
     public function validateUpdate($mode = false){
-        //if (strlen($_POST['abstract']) < 7 ){
-        //    $this->errors['abstract'] = lang::translate('Your release needs an abstract of at least 14 chars');
-        //}
         if (!empty($_FILES['file']['name'])){
             if ($_FILES['file']['error'] != 0) {
                 $error_message = file_upload_error_message($_FILES['file']['error']);
@@ -173,16 +173,17 @@ class contentFile extends db{
         if (!empty($rows)){
             $str.="<p>" . lang::translate('Files') . "</p>\n";
         }
+        print_r($_GET);
         foreach ($rows as $key => $val){
 
             $str.= "<p>";
-            $str.= "<a href=\"" . $this->basePath . "/download/$id/$val[id]/$val[title]\">$val[title]</a>";
+            $str.= "<a href=\"/files/download/$id/$val[id]/$val[title]\">$val[title]</a>";
             if (session::isAdmin()){
                 $str.=" | ";
-                $str.="<a href=\"" . $this->basePath . "/edit/$id/$val[id]\">";
+                $str.="<a href=\"/files/edit/$id/$val[id]\">";
                 $str.=lang::translate('Edit') . "</a>\n";
                 $str.=" | ";
-                $str.="<a href=\"" . $this->basePath . "/delete/$id/$val[id]\">";
+                $str.="<a href=\"/files/delete/$id/$val[id]\">";
                 $str.=lang::translate('Delete');
                 $str.="</a>\n";
             }
@@ -200,7 +201,7 @@ class contentFile extends db{
      * @return array assoc rows of modules belonging to user
      */
     public function getAllFiles(){
-        $search = array ('parent_id' => $this->id);
+        $search = array ('parent_id' => $this->parent_id);
         // prevent selecting file by specifiyng fields
         $fields = array ('id', 'parent_id', 'title', 'abstract', 'published', 'created');
         $rows = $this->selectAll($this->fileTable, $fields, $search, null, null, 'created', false);
@@ -214,7 +215,7 @@ class contentFile extends db{
      */
     public function displayAllFiles(){
         $rows = $this->getAllFiles();
-        $this->displayFiles ($this->id, $rows);
+        $this->displayFiles ($this->parent_id, $rows);
     }
     // }}}
     // {{{ getFile()
