@@ -5,7 +5,7 @@
  *
  * @package    content
  */
-if (!session::checkAccessControl('allow_edit_article')){
+if (!session::checkAccessControl('files_allow_edit')){
     return;
 }
 
@@ -18,10 +18,10 @@ if (!include_module ($_GET['reference'])){
 $class = moduleLoader::modulePathToClassName($_GET['reference']);
 $link = $class::getLinkFromId($_GET['parent_id']);
 
-$headline = lang::translate('Add File') . " :: " . $link;
+$headline = lang::translate('files_add_file') . " :: " . $link;
 headline_message($headline);
 
-template::setTitle(lang::translate('Add File'));
+template::setTitle(lang::translate('files_add_file'));
 
 $options = array (
     'parent_id' => $_GET['parent_id'],

@@ -7,8 +7,10 @@
  */
 
 include_module('files');
-$content_file = new contentFile(array());
+$content_file = new files();
+files::setFileId();
 $file = $content_file->getFile();
+
 header("Content-type: $file[mimetype]");
 echo $file['file'];
 die;

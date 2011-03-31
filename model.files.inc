@@ -21,13 +21,13 @@ include_once "mySqlForm.php";
 class files extends db {
 
 
-    public $errors = null;
-    public $status = null;
-    public $parent_id;
-    public $fileId;
-    public $maxsize = 2000000; // 2 mb max size
-    public $options = array();
-    public $fileTable = 'files';
+    public static $errors = null;
+    public static $status = null;
+    public static $parent_id;
+    public static $fileId;
+    public static $maxsize = 2000000; // 2 mb max size
+    public static $options = array();
+    public static $fileTable = 'files';
 
     // {{{ function __construct()
     /**
@@ -38,9 +38,14 @@ class files extends db {
         $uri = URI::getInstance();
         //$this->parent_id = $options['parent_id'];
         //$this->fileId = $options['id'];
-        if (isset($options)){
-            $this->options = $options;
-        }
+        //if (isset($options)){
+        
+        self::$options = $options;
+        //}
+    }
+
+    public static function setFileId (){
+        self::$fileId = uri::$fragments[2];
     }
     // }}}
     // used when invoking module as submodule.
@@ -64,28 +69,28 @@ class files extends db {
     public function viewFileForm($method, $id = null, $values = array(), $caption = null){
         $fields_captions =
             array(
-                'abstract' => lang::translate('File Abstract'),
-                'file' => lang::translate('Upload File'),
+                'abstract' => lang::translate('files_form_abstract'),
+                'file' => lang::translate('files_form_file'),
 
         );
         $fields = array('id', 'abstract', 'file');
-        $tf = new mySqlForm($this->fileTable, $fields, $values);
+        $tf = new mySqlForm(self::$fileTable, $fields, $values);
         $tf->setLabels($fields_captions);
 
         if (isset($id)){
             if ($method == 'delete'){
-                if (empty($caption)) $caption = lang::translate('Delete File');
+                if (empty($caption)) $caption = lang::translate('files_delete_label');
             } else {
                 //$fields = array('id', 'abstract', 'file');
-                $tf = new mySqlForm($this->fileTable, $fields, $values);
+                $tf = new mySqlForm(self::$fileTable, $fields, $values);
                 $tf->setLabels($fields_captions);
-                if (empty($caption)) $caption = lang::translate('Edit File');
+                if (empty($caption)) $caption = lang::translate('files_edit_label');
             }
             $tf->setMethod($method, $id);
 
         } else {
             $tf->setMethod($method);
-            if (empty($caption)) $caption = lang::translate('Upload File');
+            if (empty($caption)) $caption = lang::translate('files_add_label');
         }
         $tf->createForm('', 'post',  'content_file', '', 'multipart/form-data',  $caption);
     }
@@ -99,11 +104,11 @@ class files extends db {
      */
     public function insertFile () {
         $values = $this->prepareToPost();
-        $values['parent_id'] = $this->options['parent_id'];
-        $values['reference'] = $this->options['reference'];
+        $values['parent_id'] = self::$options['parent_id'];
+        $values['reference'] = self::$options['reference'];
 
         $options['filename'] = 'file';
-        $options['maxsize'] = $this->maxsize;
+        $options['maxsize'] = self::$maxsize;
         //$options['allow_mime'] = array("application/x-gzip");
 
         $values['file'] = uploadBlob::getFP($options);
@@ -112,7 +117,7 @@ class files extends db {
         //application/x-gzip
         //$bind = array( => PDO::PARAM_LOB);
         $bind = array('file' => PDO::PARAM_LOB);
-        $res = $this->insert($this->fileTable, $values, $bind);
+        $res = $this->insert(self::$fileTable, $values, $bind);
         return $res;
     }
     // }}}
@@ -122,15 +127,15 @@ class files extends db {
      */
     public function validateInsert($mode = false){
         if (empty($_FILES['file']['name'])){
-            $this->errors[] = lang::translate('No file specified');
+            self::$errors[] = lang::translate('files_no_file_specified');
         } else {
             if ($_FILES['file']['error'] != 0) {
                 $error_message = file_upload_error_message($_FILES['file']['error']);
-                $this->errors[] = $error_message;
+                self::$errors[] = $error_message;
             }
             if ($_FILES['file']['size'] > return_bytes(ini_get('post_max_size'))){
-                $this->errors[] = lang::translate('File specified is to big') . ' ' .
-                              lang::transate('Maximum size is: ') . ini_get('post_max_size');
+                self::$errors[] = lang::translate('files_file_too_big') . ' ' .
+                              lang::transate('files_maximum_size_is') . " " . ini_get('post_max_size');
             }
         }
     }
@@ -143,11 +148,11 @@ class files extends db {
         if (!empty($_FILES['file']['name'])){
             if ($_FILES['file']['error'] != 0) {
                 $error_message = file_upload_error_message($_FILES['file']['error']);
-                $this->errors[] = $error_message;
+                self::$errors[] = $error_message;
             }
             if ($_FILES['file']['size'] > return_bytes(ini_get('post_max_size'))){
-                $this->errors[] = lang::translate('File specified is to big') . ' ' .
-                              lang::transate('Maximum size is: ') . ini_get('post_max_size');
+                self::$errors[] = lang::translate('files_file_too_big')  . ' ' .
+                              lang::transate('files_maximum_size_is') .  " " . ini_get('post_max_size');
             }
         }
     }
@@ -161,37 +166,47 @@ class files extends db {
      *
      */
     public function deleteFile($id){
-        $res = $this->delete($this->fileTable, 'id', $id);
+        $res = $this->delete(self::$fileTable, 'id', $id);
         return $res;
     }
     // }}}
+    public static function subModulePreContent ($options){
+        $rows = self::getAllFilesInfo($options);
+        return self::displayFiles($rows, $options);
+
+    }
     // {{{ displayUserModuleReleases($id, $rows)
-    public function displayFiles($id, $rows){
+    public static function displayFiles($rows, $options){
         $str = "";
-        //$download_str = lang::translate('Download File');
-
         if (!empty($rows)){
-            $str.="<p>" . lang::translate('Files') . "</p>\n";
+            $str.= lang::translate('files_attached') . "<br />";
         }
-        print_r($_GET);
+
+        $get = http_build_query($options);
         foreach ($rows as $key => $val){
+            $title = lang::translate('files_download');
+            $title.= MENU_SUB_SEPARATOR_SEC;
+            $title.= $val['title'];
+            
+            $options = array ('title' => $val['abstract']); 
+            $str.= html::createLink("/files/download/$val[id]/$val[title]", $title, $options);
 
-            $str.= "<p>";
-            $str.= "<a href=\"/files/download/$id/$val[id]/$val[title]\">$val[title]</a>";
+
             if (session::isAdmin()){
-                $str.=" | ";
-                $str.="<a href=\"/files/edit/$id/$val[id]\">";
-                $str.=lang::translate('Edit') . "</a>\n";
-                $str.=" | ";
-                $str.="<a href=\"/files/delete/$id/$val[id]\">";
-                $str.=lang::translate('Delete');
-                $str.="</a>\n";
+                $str.= MENU_SUB_SEPARATOR_SEC;
+                $str.= html::createLink("/files/edit/$val[id]?$get", lang::translate('files_edit'));
+                $str.= MENU_SUB_SEPARATOR;
+                $str.= html::createLink("/files/delete/$val[id]?$get", lang::translate('files_delete'));
             }
-            $str.="</p>\n";
-            $str.="<p>$val[abstract]</p>\n";
+            $str.= "<br />\n";
         }
 
-        print $str;
+        if (session::isAdmin()){
+            $add_str= lang::translate('files_add');
+            $str.= html::createLink("/files/add?$get", $add_str);
+        }
+
+        return $str;
     }
     // }}}
     // {{{ getModuleReleases($moduleId = null)
@@ -200,22 +215,39 @@ class files extends db {
      *
      * @return array assoc rows of modules belonging to user
      */
-    public function getAllFiles(){
-        $search = array ('parent_id' => $this->parent_id);
-        // prevent selecting file by specifiyng fields
+    public static function getAllFilesInfo($options){
+        $db = new db();
+        $search = array (
+            'parent_id' => $options['parent_id'],
+            'reference' => $options['reference']
+        );
+
         $fields = array ('id', 'parent_id', 'title', 'abstract', 'published', 'created');
-        $rows = $this->selectAll($this->fileTable, $fields, $search, null, null, 'created', false);
+        $rows = $db->selectAll(self::$fileTable, $fields, $search, null, null, 'created', false);
         return $rows;
     }
     // }}}
+    public static function getSingleFileInfo($id = null){
+        if (!$id) $id = self::$fileId;
+        $db = new db();
+        $search = array (
+            'id' => $id
+        );
+
+        $fields = array ('id', 'parent_id', 'title', 'abstract', 'published', 'created', 'reference');
+        $row = $db->selectOne(self::$fileTable, null, $search, $fields, null, 'created', false);
+        return $row;
+    }
+    // }}}
+
     // {{{ displayUserModules
     /**
      * method for displaying all modules belonging to a user
      *
      */
     public function displayAllFiles(){
-        $rows = $this->getAllFiles();
-        $this->displayFiles ($this->parent_id, $rows);
+        //$rows = $this->getAllFiles();
+        //$this->displayFiles ($this->parent_id, $rows);
     }
     // }}}
     // {{{ getFile()
@@ -224,8 +256,9 @@ class files extends db {
      *
      * @return array assoc row with selected module
      */
-    public function getFile(){
-        $row = $this->selectOne($this->fileTable, 'id', $this->fileId);
+    public static function getFile(){
+        $db = new db();
+        $row = $db->selectOne(self::$fileTable, 'id', self::$fileId);
         return $row;
     }
     // }}}
@@ -239,31 +272,34 @@ class files extends db {
     public function updateFile () {
         $values = $this->prepareToPost();
         if (!is_uploaded_file($_FILES['file']['tmp_name']) ){
-
+            echo "not upload"; die;
         } else {
             // get a file pointer
             $options['filename'] = 'file';
-            $options['maxsize'] = $this->maxsize;
+            $options['maxsize'] = self::$maxsize;
             $values['file'] = uploadBlob::getFP($options);
             $values['title'] = $_FILES['file']['name'];
+
+            $values['mimetype'] = $_FILES['file']['type'];
+
             $bind = array('file' => PDO::PARAM_LOB);
         }
-        $res = $this->update($this->fileTable, $values, $this->fileId, $bind);
+        $res = $this->update(self::$fileTable, $values, self::$fileId, $bind);
         return $res;
     }
     // }}}
     public function viewFileFormInsert(){
         if (isset($_POST['submit'])){
             $this->validateInsert();
-            if (!isset($this->errors)){
+            if (!isset(self::$errors)){
                 $res = $this->insertFile();
                 if ($res){
-                    session::setActionMessage(lang::translate('File added'));
-                    $redirect = "Location: " . $this->options['redirect'];
+                    session::setActionMessage(lang::translate('files_file_added'));
+                    $redirect = "Location: " . self::$options['redirect'];
                     header($redirect);
                 }
             } else {
-                view_form_errors($this->errors);
+                view_form_errors(self::$errors);
             }
         }
         $this->viewFileForm('insert');
@@ -271,35 +307,35 @@ class files extends db {
 
     public function viewFileFormDelete(){
         if (isset($_POST['submit'])){
-            if (!isset($this->errors)){
-                $res = $this->deleteFile($this->fileId);
+            if (!isset(self::$errors)){
+                $res = $this->deleteFile(self::$fileId);
                 if ($res){
-                    session::setActionMessage(lang::translate('File deleted'));
-                    $header = "Location: " . $this->options['redirect'];
+                    session::setActionMessage(lang::translate('files_file_deleted'));
+                    $header = "Location: " . self::$options['redirect'];
                     header($header);
                 }
             } else {
-                view_form_errors($this->errors);
+                view_form_errors(self::$errors);
             }
         }
-        $this->viewFileForm('delete', $this->fileId);
+        $this->viewFileForm('delete', self::$fileId);
     }
 
     public function viewFileFormUpdate(){
         if (isset($_POST['submit'])){
             $this->validateUpdate();
-            if (!isset($this->errors)){
+            if (!isset(self::$errors)){
                 $res = $this->updateFile();
                 if ($res){
-                    session::setActionMessage(lang::translate('File Edited'));
-                    $header = "Location: " . $this->options['redirect'];
+                    session::setActionMessage(lang::translate('files_file_edited'));
+                    $header = "Location: " . self::$options['redirect'];
                     header($header);
                 }
             } else {
-                view_form_errors($this->errors);
+                view_form_errors(self::$errors);
             }
         }
-        $this->viewFileForm('update', $this->fileId);
+        $this->viewFileForm('update', self::$fileId);
     }
 }
 // }}}

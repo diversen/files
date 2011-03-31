@@ -1,31 +1,26 @@
 <?php
 
-/**
- * view file for deleting files
- *
- * @package    content
- */
-if (!session::checkAccessControl('allow_edit_article')){
+if (!session::checkAccessControl('files_allow_edit')){
     return;
 }
-include_model('content/article');
-$article = new article();
 
-// set headline message.
-$link = $article->getArticleHTMLLink();
-$headline = lang::translate('Delete File') . " :: " . $link;
+
+if (!include_module ($_GET['reference'])){
+    moduleLoader::$status['404'] = true;
+    session::setActionMessage("No such module: $_GET[reference]");
+    return;
+}
+
+$class = moduleLoader::modulePathToClassName($_GET['reference']);
+$link = $class::getLinkFromId($_GET['parent_id']);
+
+$headline = lang::translate('files_delete_file') . MENU_SUB_SEPARATOR_SEC . $link;
 headline_message($headline);
 
-include_module ('files');
-
-$redirect = $article->getArticleUrl(article::$id);
 $options = array (
-    'reference' => 'article',
-    'redirect' => $redirect);
+    'redirect' => $_GET['return_url']);
+$files = new files($options);
 
-$content_file = new contentFile($options);
-$file = $content_file->getFile();
-$title = lang::translate('Delete File') . ' :: ' . $file['title'];
-
-$content_file->viewFileFormDelete();
-$content_file->displayAllFiles();
+files::setFileId();
+$files->viewFileFormDelete();
+//$files->displayAllFiles();

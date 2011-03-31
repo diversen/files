@@ -1,32 +1,25 @@
 <?php
 
-/**
- * view file for adding files
- *
- * @package    content
- */
-if (!session::checkAccessControl('allow_edit_article')){
+if (!session::checkAccessControl('files_allow_edit')){
     return;
 }
 
-include_module ('content/article');
-include_module ('files');
 
-$article = new article();
-$article_row = $article->getArticle();
+if (!include_module ($_GET['reference'])){
+    moduleLoader::$status['404'] = true;
+    session::setActionMessage("No such module: $_GET[reference]");
+    return;
+}
 
-// set headline message.
-$link = $article->getArticleHTMLLink();
-$headline = lang::translate('Edit File') . " :: " . $link;
+$class = moduleLoader::modulePathToClassName($_GET['reference']);
+$link = $class::getLinkFromId($_GET['parent_id']);
+
+$headline = lang::translate('files_edit_file') . MENU_SUB_SEPARATOR_SEC . $link;
 headline_message($headline);
 
-$title = $article->getArticleTitle();
-$_TEMPLATE_ASSIGN = array('title' => $title);
-
-$redirect = $article->getArticleUrl(article::$id);
 $options = array (
-    'reference' => 'article',
-    'redirect' => $redirect);
+    'redirect' => $_GET['return_url']);
 
-$content_file = new contentFile($options);
-$content_file->viewFileFormUpdate();
+files::setFileId();
+$files = new files($options);
+$files->viewFileFormUpdate();
