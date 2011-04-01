@@ -36,12 +36,7 @@ class files extends db {
      */
     function __construct($options = null){
         $uri = URI::getInstance();
-        //$this->parent_id = $options['parent_id'];
-        //$this->fileId = $options['id'];
-        //if (isset($options)){
-        
         self::$options = $options;
-        //}
     }
 
     public static function setFileId (){
@@ -50,10 +45,10 @@ class files extends db {
     // }}}
     // used when invoking module as submodule.
     public static function subModuleAdminOptionLink ($options){
-        $get = http_build_query($options);
-        $url = '/files/add?' . $get;
-        $title = 'Add File';
-        return html::createLink($url, $title);
+        //$get = http_build_query($options);
+        //$url = '/files/add?' . $get;
+        //$title = lang::translate('files_add_file');
+        //return html::createLink($url, $title);
     }
 
 
@@ -178,11 +173,16 @@ class files extends db {
     // {{{ displayUserModuleReleases($id, $rows)
     public static function displayFiles($rows, $options){
         $str = "";
-        if (!empty($rows)){
-            $str.= lang::translate('files_attached') . "<br />";
-        }
+        
 
         $get = http_build_query($options);
+        if (session::isAdmin()){
+            $str.= lang::translate('files_attached') . MENU_SUB_SEPARATOR_SEC;
+            $add_str= lang::translate('files_add');
+            $str.= html::createLink("/files/add?$get", $add_str);
+            $str.= "<br />";
+        }
+
         foreach ($rows as $key => $val){
             $title = lang::translate('files_download');
             $title.= MENU_SUB_SEPARATOR_SEC;
@@ -190,7 +190,6 @@ class files extends db {
             
             $options = array ('title' => $val['abstract']); 
             $str.= html::createLink("/files/download/$val[id]/$val[title]", $title, $options);
-
 
             if (session::isAdmin()){
                 $str.= MENU_SUB_SEPARATOR_SEC;
@@ -201,10 +200,7 @@ class files extends db {
             $str.= "<br />\n";
         }
 
-        if (session::isAdmin()){
-            $add_str= lang::translate('files_add');
-            $str.= html::createLink("/files/add?$get", $add_str);
-        }
+        
 
         return $str;
     }
