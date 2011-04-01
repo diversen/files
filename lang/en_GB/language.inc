@@ -16,7 +16,7 @@ $_COS_LANG_MODULE['files_add_label'] = 'Add File';
 
 $_COS_LANG_MODULE['files_edit'] = 'Edit';
 $_COS_LANG_MODULE['files_delete'] = 'Delete';
-$_COS_LANG_MODULE['files_add'] = 'Add';
+$_COS_LANG_MODULE['files_add'] = 'Add New File';
 
 $_COS_LANG_MODULE['files_form_abstract'] = 'Abstract';
 $_COS_LANG_MODULE['files_form_file'] = 'Select File';
@@ -29,7 +29,7 @@ $_COS_LANG_MODULE['files_file_too_big'] = 'file is to big';
 $_COS_LANG_MODULE['files_attached'] = 'Files';
 $_COS_LANG_MODULE['files_download'] = 'Download';
 
-$_COS_LANG_MODULE['files_add_new'] = 'Add';
+$_COS_LANG_MODULE['files_add_new'] = 'Add New';
 $_COS_LANG_MODULE['files_file_added'] = 'File Added';
 $_COS_LANG_MODULE['files_file_deleted'] = 'File Deleted';
 $_COS_LANG_MODULE['files_file_edited'] = 'File Edited';

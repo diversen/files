@@ -14,7 +14,7 @@ if (!include_module ($_GET['reference'])){
 $class = moduleLoader::modulePathToClassName($_GET['reference']);
 $link = $class::getLinkFromId($_GET['parent_id']);
 
-$headline = lang::translate('files_delete_file') . MENU_SUB_SEPARATOR_SEC . $link;
+$headline = lang::translate('image_delete_file') . MENU_SUB_SEPARATOR_SEC . $link;
 headline_message($headline);
 
 $options = array (
@@ -23,4 +23,3 @@ $files = new files($options);
 
 files::setFileId();
 $files->viewFileFormDelete();
-//$files->displayAllFiles();
