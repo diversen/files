@@ -43,13 +43,7 @@ class files extends db {
         self::$fileId = uri::$fragments[2];
     }
     // }}}
-    // used when invoking module as submodule.
-    public static function subModuleAdminOptionLink ($options){
-        //$get = http_build_query($options);
-        //$url = '/files/add?' . $get;
-        //$title = lang::translate('files_add_file');
-        //return html::createLink($url, $title);
-    }
+
 
 
     // {{{ viewFilesForm($method, $id = null, $values = array(), $caption = null)
@@ -266,9 +260,10 @@ class files extends db {
      * @return boolean true on success or false on failure
      */
     public function updateFile () {
+        $bind = array();
         $values = $this->prepareToPost();
         if (!is_uploaded_file($_FILES['file']['tmp_name']) ){
-            echo "not upload"; die;
+            
         } else {
             // get a file pointer
             $options['filename'] = 'file';
