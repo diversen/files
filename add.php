@@ -1,10 +1,5 @@
 <?php
 
-/**
- * view file for adding files
- *
- * @package    content
- */
 if (!session::checkAccessControl('files_allow_edit')){
     return;
 }
