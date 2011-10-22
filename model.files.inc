@@ -56,6 +56,36 @@ class files extends db {
     * @param int       id (if delete or update)
     */
     public function viewFileForm($method, $id = null, $values = array(), $caption = null){
+     
+        html::formStart('file_upload_form');
+        if ($method == 'delete' && isset($id)) {
+            $legend = lang::translate('file_delete_label');
+            html::legend($legend);
+            html::submit('submit', lang::translate('system_submit_delete'));
+            echo html::getStr();
+            return;
+        }
+        
+        $legend = '';
+        if (isset($id)) {
+            $values = self::getSingleFileInfo($id);
+            html::init($values, 'submit'); 
+            $legend = lang::translate('file_edit_legend');
+            $submit = lang::system('system_submit_update');
+        } else {
+            $legend = lang::translate('file_add_legend');
+            $submit = lang::system('system_submit_add');
+        }
+        
+        html::legend($legend);
+        html::label('abstract', lang::translate('file_abstract_label'));
+        html::textareaSmall('abstract');
+        html::label('file', lang::translate('file_file_label'));
+        html::file('file');
+        html::submit('submit', $submit);
+        echo html::getStr();
+        return;
+        /*
         $fields_captions =
             array(
                 'abstract' => lang::translate('files_form_abstract'),
@@ -65,7 +95,7 @@ class files extends db {
         $fields = array('id', 'abstract', 'file');
         $tf = new mySqlForm(self::$fileTable, $fields, $values);
         $tf->setLabels($fields_captions);
-
+        */
         if (isset($id)){
             if ($method == 'delete'){
                 if (empty($caption)) $caption = lang::translate('files_delete_label');

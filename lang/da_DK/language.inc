@@ -35,3 +35,10 @@ $_COS_LANG_MODULE['files_file_deleted'] = 'Fil slettet';
 $_COS_LANG_MODULE['files_file_edited'] = 'Fil rettet';
 // Translation of file /home/dennis/www/osnet/modules/files/edit.php
 
+
+$_COS_LANG_MODULE['file_delete_label'] = 'Bekræft slet fil';
+$_COS_LANG_MODULE['file_edit_legend'] = 'Ret Fil';
+$_COS_LANG_MODULE['file_add_legend'] = 'Tilføj Fil';
+$_COS_LANG_MODULE['file_abstract_label'] = 'Abstrakt';
+$_COS_LANG_MODULE['file_file_label'] = 'Vælg en fil';
+$_COS_LANG_MODULE['files_submit'] = 'Send';
