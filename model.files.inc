@@ -10,16 +10,12 @@
  * @ignore
  */
 include_once "upload.php";
-include_once "mySqlForm.php";
 
 /**
  * class content files is used for keeping track of file changes
  * in db. Uses object fileUpload
- *
- * @package content
  */
 class files extends db {
-
 
     public static $errors = null;
     public static $status = null;
@@ -29,9 +25,7 @@ class files extends db {
     public static $options = array();
     public static $fileTable = 'files';
 
-    // {{{ function __construct()
     /**
-     *
      * constructor sets init vars
      */
     function __construct($options = null){
@@ -42,11 +36,7 @@ class files extends db {
     public static function setFileId (){
         self::$fileId = uri::$fragments[2];
     }
-    // }}}
 
-
-
-    // {{{ viewFilesForm($method, $id = null, $values = array(), $caption = null)
    /**
     * method for creating a form for insert, update and deleting entries
     * in module_system module
@@ -85,36 +75,8 @@ class files extends db {
         html::submit('submit', $submit);
         echo html::getStr();
         return;
-        /*
-        $fields_captions =
-            array(
-                'abstract' => lang::translate('files_form_abstract'),
-                'file' => lang::translate('files_form_file'),
-
-        );
-        $fields = array('id', 'abstract', 'file');
-        $tf = new mySqlForm(self::$fileTable, $fields, $values);
-        $tf->setLabels($fields_captions);
-        */
-        if (isset($id)){
-            if ($method == 'delete'){
-                if (empty($caption)) $caption = lang::translate('files_delete_label');
-            } else {
-                //$fields = array('id', 'abstract', 'file');
-                $tf = new mySqlForm(self::$fileTable, $fields, $values);
-                $tf->setLabels($fields_captions);
-                if (empty($caption)) $caption = lang::translate('files_edit_label');
-            }
-            $tf->setMethod($method, $id);
-
-        } else {
-            $tf->setMethod($method);
-            if (empty($caption)) $caption = lang::translate('files_add_label');
-        }
-        $tf->createForm('', 'post',  'content_file', '', 'multipart/form-data',  $caption);
     }
-
-    // {{{ insertModuleRelease()
+    
     /**
      * method for inserting a module into the database
      * (access control is cheched in controller file)
@@ -125,22 +87,16 @@ class files extends db {
         $values = $this->prepareToPost();
         $values['parent_id'] = self::$options['parent_id'];
         $values['reference'] = self::$options['reference'];
-
         $options['filename'] = 'file';
         $options['maxsize'] = self::$maxsize;
-        //$options['allow_mime'] = array("application/x-gzip");
-
         $values['file'] = uploadBlob::getFP($options);
         $values['title'] = $_FILES['file']['name'];
         $values['mimetype'] = $_FILES['file']['type'];
-        //application/x-gzip
-        //$bind = array( => PDO::PARAM_LOB);
         $bind = array('file' => PDO::PARAM_LOB);
         $res = $this->insert(self::$fileTable, $values, $bind);
         return $res;
     }
-    // }}}
-    // {{{ validateInsert()
+
     /**
      * method for validating a post before insert
      */
@@ -158,8 +114,7 @@ class files extends db {
             }
         }
     }
-    // }}}
-    // {{{ validateInsert()
+
     /**
      * method for validating a post before insert
      */
@@ -175,8 +130,7 @@ class files extends db {
             }
         }
     }
-    // }}}
-    // {{{ function deleteFile($id) $id = fileId
+
     /**
      * method for delting a file
      *
@@ -188,13 +142,25 @@ class files extends db {
         $res = $this->delete(self::$fileTable, 'id', $id);
         return $res;
     }
-    // }}}
+    
+    /**
+     * method for adding pre content when files is used as a sub module. 
+     * e.g. in content or blog. 
+     * @param type $options
+     * @return string   content to be displayed
+     */
     public static function subModulePreContent ($options){
         $rows = self::getAllFilesInfo($options);
         return self::displayFiles($rows, $options);
 
     }
-    // {{{ displayUserModuleReleases($id, $rows)
+    
+    /**
+     * method for displaying all files. 
+     * @param array $rows
+     * @param array $options
+     * @return string 
+     */
     public static function displayFiles($rows, $options){
         $str = "";
         
@@ -223,15 +189,11 @@ class files extends db {
             }
             $str.= "<br />\n";
         }
-
-        
-
         return $str;
     }
-    // }}}
-    // {{{ getModuleReleases($moduleId = null)
+
     /**
-     * method for fetching modules belonging to a user
+     * method for getting all info connected to modules.
      *
      * @return array assoc rows of modules belonging to user
      */
@@ -246,7 +208,12 @@ class files extends db {
         $rows = $db->selectAll(self::$fileTable, $fields, $search, null, null, 'created', false);
         return $rows;
     }
-    // }}}
+    
+    /**
+     * method for getting a single files info. 
+     * @param int $id
+     * @return array $row with info 
+     */
     public static function getSingleFileInfo($id = null){
         if (!$id) $id = self::$fileId;
         $db = new db();
@@ -258,36 +225,27 @@ class files extends db {
         $row = $db->selectOne(self::$fileTable, null, $search, $fields, null, 'created', false);
         return $row;
     }
-    // }}}
 
-    // {{{ displayUserModules
-    /**
-     * method for displaying all modules belonging to a user
-     *
-     */
     public function displayAllFiles(){
-        //$rows = $this->getAllFiles();
-        //$this->displayFiles ($this->parent_id, $rows);
+        
     }
-    // }}}
-    // {{{ getFile()
+
     /**
      * method for fetching one file
      *
-     * @return array assoc row with selected module
+     * @return array row with selected files info
      */
     public static function getFile(){
         $db = new db();
         $row = $db->selectOne(self::$fileTable, 'id', self::$fileId);
         return $row;
     }
-    // }}}
-    // {{{ updateModuleRelease()
+
     /**
      * method for updating a module in database
      * (access control is cheched in controller file)
      *
-     * @return boolean true on success or false on failure
+     * @return boolean  true on success or false on failure
      */
     public function updateFile () {
         $bind = array();
@@ -308,7 +266,10 @@ class files extends db {
         $res = $this->update(self::$fileTable, $values, self::$fileId, $bind);
         return $res;
     }
-    // }}}
+    
+    /**
+     * method to be used in a insert controller
+     */
     public function viewFileFormInsert(){
         if (isset($_POST['submit'])){
             $this->validateInsert();
@@ -326,6 +287,9 @@ class files extends db {
         $this->viewFileForm('insert');
     }
 
+    /**
+     * method to be used in a delete controller
+     */
     public function viewFileFormDelete(){
         if (isset($_POST['submit'])){
             if (!isset(self::$errors)){
@@ -342,6 +306,9 @@ class files extends db {
         $this->viewFileForm('delete', self::$fileId);
     }
 
+    /**
+     * merhod to be used in an update controller 
+     */
     public function viewFileFormUpdate(){
         if (isset($_POST['submit'])){
             $this->validateUpdate();
@@ -359,4 +326,3 @@ class files extends db {
         $this->viewFileForm('update', self::$fileId);
     }
 }
-// }}}
