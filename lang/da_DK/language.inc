@@ -16,7 +16,7 @@ $_COS_LANG_MODULE['files_add_label'] = 'Tilføj fil';
 
 $_COS_LANG_MODULE['files_edit'] = 'Ret';
 $_COS_LANG_MODULE['files_delete'] = 'Slet';
-$_COS_LANG_MODULE['files_add'] = 'Tilføj ny fil';
+$_COS_LANG_MODULE['files_add'] = 'Tilføj';
 
 $_COS_LANG_MODULE['files_form_abstract'] = 'Abstrakt';
 $_COS_LANG_MODULE['files_form_file'] = 'Vælg fil';

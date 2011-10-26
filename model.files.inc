@@ -33,8 +33,8 @@ class files extends db {
         self::$options = $options;
     }
 
-    public static function setFileId (){
-        self::$fileId = uri::$fragments[2];
+    public static function setFileId ($frag){
+        self::$fileId = uri::$fragments[$frag];
     }
 
    /**
@@ -164,28 +164,38 @@ class files extends db {
     public static function displayFiles($rows, $options){
         $str = "";
         
-
-        $get = http_build_query($options);
+        
+        $url = moduleLoader::buildReferenceURL('/files/add', $options);
         if (session::isAdmin()){
             $str.= lang::translate('files_attached') . MENU_SUB_SEPARATOR_SEC;
             $add_str= lang::translate('files_add');
-            $str.= html::createLink("/files/add?$get", $add_str);
+            $str.= html::createLink($url, $add_str);
             $str.= "<br />";
         }
-
+       
         foreach ($rows as $key => $val){
             $title = lang::translate('files_download');
             $title.= MENU_SUB_SEPARATOR_SEC;
             $title.= $val['title'];
             
-            $options = array ('title' => $val['abstract']); 
-            $str.= html::createLink("/files/download/$val[id]/$val[title]", $title, $options);
-
+            $link_options = array ('title' => $val['abstract']); 
+            $str.= html::createLink(
+                       "/files/download/$val[id]/$val[title]", 
+                       $title, 
+                       $link_options
+                   );
+            
+            // as a sub module the sub module can not know anything about the
+            // id of individual files. That's why we will add id. 
+            //print_r($options);
+            $options['id'] = $val['id'];
             if (session::isAdmin()){
                 $str.= MENU_SUB_SEPARATOR_SEC;
-                $str.= html::createLink("/files/edit/$val[id]?$get", lang::translate('files_edit'));
+                $url = moduleLoader::buildReferenceURL('/files/edit', $options);
+                $str.= html::createLink($url, lang::translate('files_edit'));
                 $str.= MENU_SUB_SEPARATOR;
-                $str.= html::createLink("/files/delete/$val[id]?$get", lang::translate('files_delete'));
+                $url = moduleLoader::buildReferenceURL('/files/delete', $options);
+                $str.= html::createLink($url, lang::translate('files_delete'));
             }
             $str.= "<br />\n";
         }
@@ -298,6 +308,7 @@ class files extends db {
                     session::setActionMessage(lang::translate('files_file_deleted'));
                     $header = "Location: " . self::$options['redirect'];
                     header($header);
+                    exit;
                 }
             } else {
                 view_form_errors(self::$errors);
@@ -318,6 +329,7 @@ class files extends db {
                     session::setActionMessage(lang::translate('files_file_edited'));
                     $header = "Location: " . self::$options['redirect'];
                     header($header);
+                    exit;
                 }
             } else {
                 view_form_errors(self::$errors);

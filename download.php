@@ -8,7 +8,7 @@
 
 include_module('files');
 $content_file = new files();
-files::setFileId();
+files::setFileId($frag = 2);
 $file = $content_file->getFile();
 
 header("Content-type: $file[mimetype]");
