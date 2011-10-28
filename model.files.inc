@@ -47,6 +47,7 @@ class files extends db {
     */
     public function viewFileForm($method, $id = null, $values = array(), $caption = null){
      
+        $values = html::specialEncode($values);
         html::formStart('file_upload_form');
         if ($method == 'delete' && isset($id)) {
             $legend = lang::translate('file_delete_label');
@@ -87,9 +88,14 @@ class files extends db {
         $values = $this->prepareToPost();
         $values['parent_id'] = self::$options['parent_id'];
         $values['reference'] = self::$options['reference'];
-        $options['filename'] = 'file';
         $options['maxsize'] = self::$maxsize;
-        $values['file'] = uploadBlob::getFP($options);
+        
+        $fp = uploadBlob::getFP('file', $options);
+        if (!$fp) {
+            self::$errors = uploadBlob::$errors;
+            return false;
+        }
+        $values['file'] = $fp;
         $values['title'] = $_FILES['file']['name'];
         $values['mimetype'] = $_FILES['file']['type'];
         $bind = array('file' => PDO::PARAM_LOB);
@@ -103,33 +109,9 @@ class files extends db {
     public function validateInsert($mode = false){
         if (empty($_FILES['file']['name'])){
             self::$errors[] = lang::translate('files_no_file_specified');
-        } else {
-            if ($_FILES['file']['error'] != 0) {
-                $error_message = file_upload_error_message($_FILES['file']['error']);
-                self::$errors[] = $error_message;
-            }
-            if ($_FILES['file']['size'] > return_bytes(ini_get('post_max_size'))){
-                self::$errors[] = lang::translate('files_file_too_big') . ' ' .
-                              lang::transate('files_maximum_size_is') . " " . ini_get('post_max_size');
-            }
-        }
+        } 
     }
 
-    /**
-     * method for validating a post before insert
-     */
-    public function validateUpdate($mode = false){
-        if (!empty($_FILES['file']['name'])){
-            if ($_FILES['file']['error'] != 0) {
-                $error_message = file_upload_error_message($_FILES['file']['error']);
-                self::$errors[] = $error_message;
-            }
-            if ($_FILES['file']['size'] > return_bytes(ini_get('post_max_size'))){
-                self::$errors[] = lang::translate('files_file_too_big')  . ' ' .
-                              lang::transate('files_maximum_size_is') .  " " . ini_get('post_max_size');
-            }
-        }
-    }
 
     /**
      * method for delting a file
@@ -236,9 +218,6 @@ class files extends db {
         return $row;
     }
 
-    public function displayAllFiles(){
-        
-    }
 
     /**
      * method for fetching one file
@@ -259,16 +238,22 @@ class files extends db {
      */
     public function updateFile () {
         $bind = array();
-        $values = $this->prepareToPost();
-        if (!is_uploaded_file($_FILES['file']['tmp_name']) ){
+        $values['abstract'] = html::specialDecode($_POST['abstract']);
+
+        //print_r($_FILES); die;
+        if (!empty($_FILES['file']['name']) ){
             
-        } else {
-            // get a file pointer
+            $options = array ();
             $options['filename'] = 'file';
             $options['maxsize'] = self::$maxsize;
-            $values['file'] = uploadBlob::getFP($options);
+            
+            $fp = uploadBlob::getFP('file', $options);
+            if (!$fp) {
+                self::$errors = uploadBlob::$errors;
+                return false;
+            }
+            $values['file'] = $fp;
             $values['title'] = $_FILES['file']['name'];
-
             $values['mimetype'] = $_FILES['file']['type'];
 
             $bind = array('file' => PDO::PARAM_LOB);
@@ -289,6 +274,8 @@ class files extends db {
                     session::setActionMessage(lang::translate('files_file_added'));
                     $redirect = "Location: " . self::$options['redirect'];
                     header($redirect);
+                } else {
+                    view_form_errors(self::$errors);
                 }
             } else {
                 view_form_errors(self::$errors);
@@ -322,7 +309,6 @@ class files extends db {
      */
     public function viewFileFormUpdate(){
         if (isset($_POST['submit'])){
-            $this->validateUpdate();
             if (!isset(self::$errors)){
                 $res = $this->updateFile();
                 if ($res){
@@ -330,6 +316,8 @@ class files extends db {
                     $header = "Location: " . self::$options['redirect'];
                     header($header);
                     exit;
+                } else {
+                    view_form_errors(self::$errors);
                 }
             } else {
                 view_form_errors(self::$errors);

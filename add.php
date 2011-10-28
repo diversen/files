@@ -18,7 +18,7 @@ headline_message($headline);
 template::setTitle(lang::translate('files_add_file'));
 
 $options = moduleLoader::getReferenceInfo();
-//print_r($options);
+
 $files = new files($options);
 $files->viewFileFormInsert();
-$files->displayAllFiles();
+
