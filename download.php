@@ -12,7 +12,7 @@ files::setFileId($frag = 2);
 $file = $content_file->getFile();
 
 header("Content-type: $file[mimetype]");
-$data_len = strlen ($row['file']);
+$data_len = strlen ($file['file']);
 
 header ("Content-Length: $data_len");
 echo $file['file'];

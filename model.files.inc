@@ -31,6 +31,13 @@ class files extends db {
     function __construct($options = null){
         $uri = URI::getInstance();
         self::$options = $options;
+        
+        if (!isset($options['maxsize'])) {
+            $maxsize = get_module_ini('files_max_size');
+            if ($maxsize) {
+                self::$options['maxsize'] = $maxsize;
+            }
+        }
     }
 
     public static function setFileId ($frag){
@@ -88,7 +95,7 @@ class files extends db {
         $values = $this->prepareToPost();
         $values['parent_id'] = self::$options['parent_id'];
         $values['reference'] = self::$options['reference'];
-        $options['maxsize'] = self::$maxsize;
+        $options['maxsize'] = self::$options['maxsize'];
         
         $fp = uploadBlob::getFP('file', $options);
         if (!$fp) {
@@ -245,7 +252,7 @@ class files extends db {
             
             $options = array ();
             $options['filename'] = 'file';
-            $options['maxsize'] = self::$maxsize;
+            $options['maxsize'] = self::$options['maxsize'];
             
             $fp = uploadBlob::getFP('file', $options);
             if (!$fp) {
