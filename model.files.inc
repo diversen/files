@@ -33,7 +33,7 @@ class files extends db {
         self::$options = $options;
         
         if (!isset($options['maxsize'])) {
-            $maxsize = get_module_ini('files_max_size');
+            $maxsize = config::getModuleIni('files_max_size');
             if ($maxsize) {
                 self::$options['maxsize'] = $maxsize;
             }
