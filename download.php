@@ -6,7 +6,7 @@
  * @package     module_system
  */
 
-include_module('files');
+moduleLoader::includeModule('files');
 $content_file = new files();
 files::setFileId($frag = 2);
 $file = $content_file->getFile();
