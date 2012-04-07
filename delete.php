@@ -4,6 +4,7 @@ if (!session::checkAccessControl('files_allow_edit')){
     return;
 }
 
+moduleLoader::$referenceOptions = array ('edit_link' => 'true');
 if (!moduleLoader::includeRefrenceModule()){   
     moduleLoader::$status['404'] = true;
     return;
