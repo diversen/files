@@ -9,6 +9,8 @@ if (!moduleLoader::includeRefrenceModule()){
     return;
 }
 
+moduleLoader::$referenceOptions = array ('type' => 'edit');
+
 $link = moduleLoader::$referenceLink;
 $headline = lang::translate('files_edit_file') . MENU_SUB_SEPARATOR_SEC . $link;
 headline_message($headline);

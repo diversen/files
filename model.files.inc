@@ -60,6 +60,7 @@ class files extends db {
             $legend = lang::translate('file_delete_label');
             html::legend($legend);
             html::submit('submit', lang::translate('system_submit_delete'));
+            html::formEnd();
             echo html::getStr();
             return;
         }
@@ -81,6 +82,7 @@ class files extends db {
         html::label('file', lang::translate('file_file_label'));
         html::file('file');
         html::submit('submit', $submit);
+        html::formEnd();
         echo html::getStr();
         return;
     }
@@ -141,7 +143,20 @@ class files extends db {
     public static function subModulePreContent ($options){
         $rows = self::getAllFilesInfo($options);
         return self::displayFiles($rows, $options);
-
+    }
+    
+     /**
+     * method for adding pre content when files is used as a sub module. 
+     * e.g. in content or blog. 
+     * @param type $options
+     * @return string   content to be displayed
+     */
+    public static function subModuleAdminOption ($options){
+        $str = "";
+        $url = moduleLoader::buildReferenceURL('/files/add', $options);
+        $add_str= lang::translate('files_add');
+        $str.= html::createLink($url, $add_str);
+        return $str;
     }
     
     /**
@@ -151,16 +166,7 @@ class files extends db {
      * @return string 
      */
     public static function displayFiles($rows, $options){
-        $str = "";
-        
-        
-        $url = moduleLoader::buildReferenceURL('/files/add', $options);
-        if (session::isAdmin()){
-            $str.= lang::translate('files_attached') . MENU_SUB_SEPARATOR_SEC;
-            $add_str= lang::translate('files_add');
-            $str.= html::createLink($url, $add_str);
-            $str.= "<br />";
-        }
+        $str = '';
        
         foreach ($rows as $key => $val){
             $title = lang::translate('files_download');
@@ -178,7 +184,7 @@ class files extends db {
             // id of individual files. That's why we will add id. 
             //print_r($options);
             $options['id'] = $val['id'];
-            if (session::isAdmin()){
+            if (isset($options['admin'])){
                 $str.= MENU_SUB_SEPARATOR_SEC;
                 $url = moduleLoader::buildReferenceURL('/files/edit', $options);
                 $str.= html::createLink($url, lang::translate('files_edit'));
@@ -244,6 +250,7 @@ class files extends db {
      * @return boolean  true on success or false on failure
      */
     public function updateFile () {
+        
         $bind = array();
         $values['abstract'] = html::specialDecode($_POST['abstract']);
 
@@ -273,13 +280,14 @@ class files extends db {
      * method to be used in a insert controller
      */
     public function viewFileFormInsert(){
+        $redirect = moduleLoader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             $this->validateInsert();
             if (!isset(self::$errors)){
                 $res = $this->insertFile();
                 if ($res){
                     session::setActionMessage(lang::translate('files_file_added'));
-                    $redirect = "Location: " . self::$options['redirect'];
+                    $header = "Location: " . $redirect;
                     header($redirect);
                 } else {
                     view_form_errors(self::$errors);
@@ -295,12 +303,13 @@ class files extends db {
      * method to be used in a delete controller
      */
     public function viewFileFormDelete(){
+        $redirect = moduleLoader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             if (!isset(self::$errors)){
                 $res = $this->deleteFile(self::$fileId);
                 if ($res){
                     session::setActionMessage(lang::translate('files_file_deleted'));
-                    $header = "Location: " . self::$options['redirect'];
+                    $header = "Location: " . $redirect;
                     header($header);
                     exit;
                 }
@@ -315,12 +324,13 @@ class files extends db {
      * merhod to be used in an update controller 
      */
     public function viewFileFormUpdate(){
+        $redirect = moduleLoader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             if (!isset(self::$errors)){
                 $res = $this->updateFile();
                 if ($res){
                     session::setActionMessage(lang::translate('files_file_edited'));
-                    $header = "Location: " . self::$options['redirect'];
+                    $header = "Location: " . $redirect;
                     header($header);
                     exit;
                 } else {
