@@ -80,21 +80,9 @@ class files extends db {
         html::label('abstract', lang::translate('file_abstract_label'));
         html::textareaSmall('abstract');
         
-        
         $bytes = config::getModuleIni('files_max_size');
-        /*
-        html::hidden('MAX_FILE_SIZE', $bytes);
-        
-        $label = lang::system('system_form_label_file') . ". ";
-        $label.= lang::system('system_file_allowed_maxsize');
-        $size = bytesToSize($bytes);
-        $label.= $size;
-        
-        html::label('file', $label );
-        html::file('file');
-         * 
-         */
         html::fileWithLabel('file', $bytes);
+        
         html::submit('submit', $submit);
         html::formEnd();
         echo html::getStr();
