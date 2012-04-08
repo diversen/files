@@ -79,8 +79,22 @@ class files extends db {
         html::legend($legend);
         html::label('abstract', lang::translate('file_abstract_label'));
         html::textareaSmall('abstract');
-        html::label('file', lang::translate('file_file_label'));
+        
+        
+        $bytes = config::getModuleIni('files_max_size');
+        /*
+        html::hidden('MAX_FILE_SIZE', $bytes);
+        
+        $label = lang::system('system_form_label_file') . ". ";
+        $label.= lang::system('system_file_allowed_maxsize');
+        $size = bytesToSize($bytes);
+        $label.= $size;
+        
+        html::label('file', $label );
         html::file('file');
+         * 
+         */
+        html::fileWithLabel('file', $bytes);
         html::submit('submit', $submit);
         html::formEnd();
         echo html::getStr();
@@ -280,6 +294,8 @@ class files extends db {
      * method to be used in a insert controller
      */
     public function viewFileFormInsert(){
+        
+        
         $redirect = moduleLoader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             $this->validateInsert();

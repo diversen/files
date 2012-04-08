@@ -22,6 +22,7 @@ $options = moduleLoader::getReferenceInfo();
 $files = new files($options);
 $files->viewFileFormInsert();
 
+$options['admin'] = true;
 $rows = $files->getAllFilesInfo($options);
 echo $files->displayFiles($rows, $options);
 //print_r($rows);
