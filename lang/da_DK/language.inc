@@ -5,7 +5,7 @@
 $_COS_LANG_MODULE['files_edit_file'] = 'Ret fil';
 // Translation of file /home/dennis/www/osnet/modules/files/add.php
 
-$_COS_LANG_MODULE['files_add_file'] = 'Tilføj fil';
+$_COS_LANG_MODULE['files_add_file'] = 'Rediger filer';
 // Translation of file /home/dennis/www/osnet/modules/files/model.files.inc
 
 $_COS_LANG_MODULE['files_delete_file'] = 'Slet fil';
