@@ -1,2 +1,2 @@
 files_allow_edit = 'admin'
-files_max_size = 40000000
+files_max_size = 60000000
