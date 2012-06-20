@@ -29,7 +29,6 @@ class files extends db {
      * constructor sets init vars
      */
     function __construct($options = null){
-        $uri = URI::getInstance();
         self::$options = $options;
         
         if (!isset($options['maxsize'])) {
