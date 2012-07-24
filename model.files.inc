@@ -290,8 +290,7 @@ class files extends db {
                 $res = $this->insertFile();
                 if ($res){
                     session::setActionMessage(lang::translate('files_file_added'));
-                    $header = "Location: " . $redirect;
-                    header($redirect);
+                    http::locationHeader($redirect);
                 } else {
                     view_form_errors(self::$errors);
                 }
