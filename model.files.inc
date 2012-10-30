@@ -310,10 +310,9 @@ class files extends db {
             if (!isset(self::$errors)){
                 $res = $this->deleteFile(self::$fileId);
                 if ($res){
-                    session::setActionMessage(lang::translate('files_file_deleted'));
-                    $header = "Location: " . $redirect;
-                    header($header);
-                    exit;
+                    session::setActionMessage(
+                            lang::translate('files_file_deleted'));
+                    http::locationHeader($redirect);
                 }
             } else {
                 view_form_errors(self::$errors);
@@ -331,10 +330,9 @@ class files extends db {
             if (!isset(self::$errors)){
                 $res = $this->updateFile();
                 if ($res){
-                    session::setActionMessage(lang::translate('files_file_edited'));
-                    $header = "Location: " . $redirect;
-                    header($header);
-                    exit;
+                    session::setActionMessage(
+                            lang::translate('files_file_edited'));
+                    http::locationHeader($redirect);
                 } else {
                     view_form_errors(self::$errors);
                 }
