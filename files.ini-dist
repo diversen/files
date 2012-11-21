@@ -1,2 +1,4 @@
+; who can edit files
 files_allow_edit = 'admin'
+; max file size in bytes - 60MB
 files_max_size = 60000000
