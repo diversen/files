@@ -154,7 +154,7 @@ class files extends db {
      */
     public static function subModuleAdminOption ($options){
         $str = "";
-        $url = moduleLoader::buildReferenceURL('/files/add', $options);
+        $url = moduleloader::buildReferenceURL('/files/add', $options);
         $add_str= lang::translate('files_add');
         $str.= html::createLink($url, $add_str);
         return $str;
@@ -187,10 +187,10 @@ class files extends db {
             $options['id'] = $val['id'];
             if (isset($options['admin'])){
                 $str.= MENU_SUB_SEPARATOR_SEC;
-                $url = moduleLoader::buildReferenceURL('/files/edit', $options);
+                $url = moduleloader::buildReferenceURL('/files/edit', $options);
                 $str.= html::createLink($url, lang::translate('files_edit'));
                 $str.= MENU_SUB_SEPARATOR;
-                $url = moduleLoader::buildReferenceURL('/files/delete', $options);
+                $url = moduleloader::buildReferenceURL('/files/delete', $options);
                 $str.= html::createLink($url, lang::translate('files_delete'));
             }
             $str.= "<br />\n";
@@ -283,7 +283,7 @@ class files extends db {
     public function viewFileFormInsert(){
         
         
-        $redirect = moduleLoader::buildReferenceURL('/files/add', self::$options);
+        $redirect = moduleloader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             $this->validateInsert();
             if (!isset(self::$errors)){
@@ -305,7 +305,7 @@ class files extends db {
      * method to be used in a delete controller
      */
     public function viewFileFormDelete(){
-        $redirect = moduleLoader::buildReferenceURL('/files/add', self::$options);
+        $redirect = moduleloader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             if (!isset(self::$errors)){
                 $res = $this->deleteFile(self::$fileId);
@@ -325,7 +325,7 @@ class files extends db {
      * merhod to be used in an update controller 
      */
     public function viewFileFormUpdate(){
-        $redirect = moduleLoader::buildReferenceURL('/files/add', self::$options);
+        $redirect = moduleloader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             if (!isset(self::$errors)){
                 $res = $this->updateFile();
