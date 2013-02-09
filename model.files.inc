@@ -292,10 +292,10 @@ class files extends db {
                     session::setActionMessage(lang::translate('files_file_added'));
                     http::locationHeader($redirect);
                 } else {
-                    view_form_errors(self::$errors);
+                    html::errors(self::$errors);
                 }
             } else {
-                view_form_errors(self::$errors);
+                html::errors(self::$errors);
             }
         }
         $this->viewFileForm('insert');
@@ -315,7 +315,7 @@ class files extends db {
                     http::locationHeader($redirect);
                 }
             } else {
-                view_form_errors(self::$errors);
+                html::errors(self::$errors);
             }
         }
         $this->viewFileForm('delete', self::$fileId);
@@ -334,10 +334,10 @@ class files extends db {
                             lang::translate('files_file_edited'));
                     http::locationHeader($redirect);
                 } else {
-                    view_form_errors(self::$errors);
+                    html::errors(self::$errors);
                 }
             } else {
-                view_form_errors(self::$errors);
+                html::errors(self::$errors);
             }
         }
         $this->viewFileForm('update', self::$fileId);
