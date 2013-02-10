@@ -6,7 +6,7 @@
  * @package    files
  */
 
-$_INSTALL['VERSION'] = 1.70;
+$_INSTALL['VERSION'] = 1.81;
 
 $_INSTALL['PUBLIC_CLONE_URL'] = 'git://github.com/diversen/files.git';
 $_INSTALL['PRIVATE_CLONE_URL'] = 'git@github.com:diversen/files.git';
