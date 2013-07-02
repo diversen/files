@@ -8,8 +8,18 @@
 
 moduleloader::includeModule('files');
 $content_file = new files();
-files::setFileId($frag = 2);
-$file = $content_file->getFile();
+
+if (config::getModuleIni('files_use_uniqid') == 1) {
+    $file = $content_file->getFileFromTitle(uri::fragment(3));
+} else {
+    files::setFileId($frag = 2);
+    $file = $content_file->getFile();
+}
+
+if (empty($file)) {
+    header("HTTP/1.1 404 Not Found");
+    die;
+}
 
 header("Content-type: $file[mimetype]");
 $data_len = strlen ($file['file']);

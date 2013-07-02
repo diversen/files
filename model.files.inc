@@ -15,7 +15,7 @@ include_once "coslib/upload.php";
  * class content files is used for keeping track of file changes
  * in db. Uses object fileUpload
  */
-class files extends db {
+class files {
 
     public static $errors = null;
     public static $status = null;
@@ -27,6 +27,14 @@ class files extends db {
 
     /**
      * constructor sets init vars
+     * @param array $options['parent_id'] 
+     *                  parent_id. Connect your file to a id
+     *              $options['reference'] 
+     *                  reference. Connect your file to a reference, e.g. a module_name
+     *              $options['maxsize'] maxsize. 
+     *                  Set maxsize of uploaded file. Else we will use ini setting
+     *                  Set in bytes
+     *                                          
      */
     function __construct($options = null){
         self::$options = $options;
@@ -94,8 +102,8 @@ class files extends db {
      *
      * @return boolean true on success or false on failure
      */
-    public function insertFile () {
-        $values = $this->prepareToPost();
+    public function insertFile ($options = array ()) {
+        $values = db::prepareToPost();
         $values['parent_id'] = self::$options['parent_id'];
         $values['reference'] = self::$options['reference'];
         $options['maxsize'] = self::$options['maxsize'];
@@ -106,10 +114,18 @@ class files extends db {
             return false;
         }
         $values['file'] = $fp;
-        $values['title'] = $_FILES['file']['name'];
+        
+        if (isset($options['uniqid'])) {
+            $values['title'] = md5(uniqid());
+        } else {
+            $values['title'] = $_FILES['file']['name'];
+        }
+        
         $values['mimetype'] = $_FILES['file']['type'];
         $bind = array('file' => PDO::PARAM_LOB);
-        $res = $this->insert(self::$fileTable, $values, $bind);
+        
+        $db = new db();
+        $res = $db->insert(self::$fileTable, $values, $bind);
         return $res;
     }
 
@@ -131,8 +147,26 @@ class files extends db {
      *
      */
     public function deleteFile($id){
-        $res = $this->delete(self::$fileTable, 'id', $id);
+        $db = new db();
+        $res = $db->delete(self::$fileTable, 'id', $id);
         return $res;
+    }
+    
+    /**
+     * 
+     * @param type $options array ('parent_id', 'reference');
+     * @return boolean $res true on succes and false on failure
+     */
+    public function deleteAllFiles ($options) {
+        $files = $this->getAllFilesInfo($options);
+
+        $final = true;
+        foreach ($files as $file) {
+            $res = $this->deleteFile($file['id']);
+            if (!$res) $final = false;
+        }
+        
+        return $final;
     }
     
     /**
@@ -160,6 +194,22 @@ class files extends db {
         return $str;
     }
     
+    
+    /**
+     * generates a file link from a row, title, and link options
+     * @param array $val
+     * @param string $title
+     * @param array $options
+     * @return string $link
+     */
+    public static function getFileLink($val, $title, $options = array ()) {
+        return html::createLink(
+                       "/files/download/$val[id]/$val[title]", 
+                       $title, 
+                       $options
+                   );
+    }
+    
     /**
      * method for displaying all files. 
      * @param array $rows
@@ -169,14 +219,14 @@ class files extends db {
     public static function displayFiles($rows, $options){
         $str = '';
        
-        foreach ($rows as $key => $val){
+        foreach ($rows as $val){
             $title = lang::translate('files_download');
             $title.= MENU_SUB_SEPARATOR_SEC;
             $title.= $val['title'];
             
             $link_options = array ('title' => $val['abstract']); 
-            $str.= html::createLink(
-                       "/files/download/$val[id]/$val[title]", 
+            $str.= self::getFileLink(
+                       $val, 
                        $title, 
                        $link_options
                    );
@@ -200,8 +250,8 @@ class files extends db {
 
     /**
      * method for getting all info connected to modules.
-     *
-     * @return array assoc rows of modules belonging to user
+     * @param array $options array ('parent_id', 'reference');
+     * @return array $rows assoc array with all file info
      */
     public static function getAllFilesInfo($options){
         $db = new db();
@@ -243,6 +293,17 @@ class files extends db {
         $row = $db->selectOne(self::$fileTable, 'id', self::$fileId);
         return $row;
     }
+    
+        /**
+     * method for fetching one file
+     *
+     * @return array row with selected files info
+     */
+    public static function getFileFromTitle($title){
+        $db = new db();
+        $row = $db->selectOne(self::$fileTable, 'title', $title);
+        return $row;
+    }
 
     /**
      * method for updating a module in database
@@ -273,7 +334,8 @@ class files extends db {
 
             $bind = array('file' => PDO::PARAM_LOB);
         }
-        $res = $this->update(self::$fileTable, $values, self::$fileId, $bind);
+        $db = new db();
+        $res = $db->update(self::$fileTable, $values, self::$fileId, $bind);
         return $res;
     }
     
