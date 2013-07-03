@@ -103,6 +103,11 @@ class files {
      * @return boolean true on success or false on failure
      */
     public function insertFile ($options = array ()) {
+        
+        if (config::getModuleIni('files_use_uniqid') == 1) {
+            $options['uniqid'] = true;
+        }
+        
         $values = db::prepareToPost();
         $values['parent_id'] = self::$options['parent_id'];
         $values['reference'] = self::$options['reference'];
