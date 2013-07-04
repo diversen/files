@@ -255,10 +255,12 @@ class files {
      */
     public static function getAllFilesInfo($options){
         $db = new db();
-        $search = array (
-            'parent_id' => $options['parent_id'],
+        $search = array (  
             'reference' => $options['reference']
         );
+        if (isset($options['parent_id'])) {
+            $search['parent_id'] = $options['parent_id']; 
+        }
 
         $fields = array ('id', 'parent_id', 'title', 'abstract', 'published', 'created');
         $rows = $db->selectAll(self::$fileTable, $fields, $search, null, null, 'created', false);
