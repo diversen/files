@@ -42,3 +42,5 @@ $_COS_LANG_MODULE['file_add_legend'] = 'Tilføj Fil';
 $_COS_LANG_MODULE['file_abstract_label'] = 'Abstrakt';
 $_COS_LANG_MODULE['file_file_label'] = 'Vælg en fil';
 $_COS_LANG_MODULE['files_submit'] = 'Send';
+
+$_COS_LANG_MODULE['system_submit_delete'] = 'system_submit_delete';
