@@ -1,0 +1,30 @@
+<?php
+
+$_COS_LANG_MODULE['files_edit_file'] = 'Redigera Arkiv';
+$_COS_LANG_MODULE['files_add_file'] = 'Lägg File';
+$_COS_LANG_MODULE['files_delete_file'] = 'Ta bort fil';
+$_COS_LANG_MODULE['files_edit_label'] = 'Redigera Arkiv';
+$_COS_LANG_MODULE['files_delete_label'] = 'Ta bort fil';
+$_COS_LANG_MODULE['files_add_label'] = 'Lägg File';
+$_COS_LANG_MODULE['files_edit'] = 'Redigera';
+$_COS_LANG_MODULE['files_delete'] = 'Radera';
+$_COS_LANG_MODULE['files_add'] = 'Redigera filer';
+$_COS_LANG_MODULE['files_form_abstract'] = 'Abstrakt';
+$_COS_LANG_MODULE['files_form_file'] = 'Välj Arkiv';
+$_COS_LANG_MODULE['files_delete_caption'] = 'Ta bort fil';
+$_COS_LANG_MODULE['files_edit_caption'] = 'Redigera Arkiv';
+$_COS_LANG_MODULE['files_add_caption'] = 'Lägg till ny fil';
+$_COS_LANG_MODULE['files_no_file_specified'] = 'Ingen fil specificerad';
+$_COS_LANG_MODULE['files_file_too_big'] = 'filen är för stor';
+$_COS_LANG_MODULE['files_attached'] = 'Filer';
+$_COS_LANG_MODULE['files_download'] = 'Ladda ner';
+$_COS_LANG_MODULE['files_add_new'] = 'Lägg till ny';
+$_COS_LANG_MODULE['files_file_added'] = 'Arkiv tillagd';
+$_COS_LANG_MODULE['files_file_deleted'] = 'Filen raderas';
+$_COS_LANG_MODULE['files_file_edited'] = 'File Redigerad';
+$_COS_LANG_MODULE['file_delete_label'] = 'Ta bort fil';
+$_COS_LANG_MODULE['system_submit_delete'] = 'Radera';
+$_COS_LANG_MODULE['file_edit_legend'] = 'Redigera Arkiv';
+$_COS_LANG_MODULE['file_add_legend'] = 'Lägg File';
+$_COS_LANG_MODULE['file_abstract_label'] = 'Abstrakt';
+$_COS_LANG_MODULE['file_file_label'] = 'Fil';
