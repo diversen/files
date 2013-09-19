@@ -194,7 +194,7 @@ class files {
     public static function subModuleAdminOption ($options){
         $str = "";
         $url = moduleloader::buildReferenceURL('/files/add', $options);
-        $add_str= lang::translate('Add file');
+        $add_str= lang::translate('Edit files');
         $str.= html::createLink($url, $add_str);
         return $str;
     }

@@ -38,3 +38,5 @@ $_COS_LANG_MODULE['Edit file'] = 'Edit file';
 $_COS_LANG_MODULE['Add file'] = 'Add file';
 $_COS_LANG_MODULE['Abstract'] = 'Abstract';
 $_COS_LANG_MODULE['File'] = 'File';
+
+$_COS_LANG_MODULE['Edit files'] = 'Edit files';
