@@ -12,10 +12,10 @@ if (!moduleloader::includeRefrenceModule()){
 moduleloader::$referenceOptions = array ('edit_link' => 'true');
 
 $link = moduleloader::$referenceLink;
-$headline = lang::translate('files_edit_file') . MENU_SUB_SEPARATOR_SEC . $link;
+$headline = lang::translate('Edit file') . MENU_SUB_SEPARATOR_SEC . $link;
 html::headline($headline);
 
-template::setTitle(lang::translate('files_edit_file'));
+template::setTitle(lang::translate('Edit file'));
 
 $options = moduleloader::getReferenceInfo();
 

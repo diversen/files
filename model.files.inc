@@ -64,9 +64,9 @@ class files {
         $values = html::specialEncode($values);
         html::formStart('file_upload_form');
         if ($method == 'delete' && isset($id)) {
-            $legend = lang::translate('file_delete_label');
+            $legend = lang::translate('Delete file');
             html::legend($legend);
-            html::submit('submit', lang::translate('system_submit_delete'));
+            html::submit('submit', lang::translate('Delete'));
             html::formEnd();
             echo html::getStr();
             return;
@@ -76,15 +76,15 @@ class files {
         if (isset($id)) {
             $values = self::getSingleFileInfo($id);
             html::init($values, 'submit'); 
-            $legend = lang::translate('file_edit_legend');
+            $legend = lang::translate('Edit file');
             $submit = lang::system('system_submit_update');
         } else {
-            $legend = lang::translate('file_add_legend');
+            $legend = lang::translate('Add file');
             $submit = lang::system('system_submit_add');
         }
         
         html::legend($legend);
-        html::label('abstract', lang::translate('file_abstract_label'));
+        html::label('abstract', lang::translate('Abstract'));
         html::textareaSmall('abstract');
         
         $bytes = config::getModuleIni('files_max_size');
@@ -139,7 +139,7 @@ class files {
      */
     public function validateInsert($mode = false){
         if (empty($_FILES['file']['name'])){
-            self::$errors[] = lang::translate('files_no_file_specified');
+            self::$errors[] = lang::translate('No file was specified');
         } 
     }
 
@@ -194,7 +194,7 @@ class files {
     public static function subModuleAdminOption ($options){
         $str = "";
         $url = moduleloader::buildReferenceURL('/files/add', $options);
-        $add_str= lang::translate('files_add');
+        $add_str= lang::translate('Add file');
         $str.= html::createLink($url, $add_str);
         return $str;
     }
@@ -225,7 +225,7 @@ class files {
         $str = '';
        
         foreach ($rows as $val){
-            $title = lang::translate('files_download');
+            $title = lang::translate('Download');
             $title.= MENU_SUB_SEPARATOR_SEC;
             $title.= $val['title'];
             
@@ -243,10 +243,10 @@ class files {
             if (isset($options['admin'])){
                 $str.= MENU_SUB_SEPARATOR_SEC;
                 $url = moduleloader::buildReferenceURL('/files/edit', $options);
-                $str.= html::createLink($url, lang::translate('files_edit'));
+                $str.= html::createLink($url, lang::translate('Edit'));
                 $str.= MENU_SUB_SEPARATOR;
                 $url = moduleloader::buildReferenceURL('/files/delete', $options);
-                $str.= html::createLink($url, lang::translate('files_delete'));
+                $str.= html::createLink($url, lang::translate('Delete'));
             }
             $str.= "<br />\n";
         }
@@ -358,7 +358,7 @@ class files {
             if (!isset(self::$errors)){
                 $res = $this->insertFile();
                 if ($res){
-                    session::setActionMessage(lang::translate('files_file_added'));
+                    session::setActionMessage(lang::translate('File was added'));
                     http::locationHeader($redirect);
                 } else {
                     html::errors(self::$errors);
@@ -380,7 +380,7 @@ class files {
                 $res = $this->deleteFile(self::$fileId);
                 if ($res){
                     session::setActionMessage(
-                            lang::translate('files_file_deleted'));
+                            lang::translate('File was deleted'));
                     http::locationHeader($redirect);
                 }
             } else {
@@ -400,7 +400,7 @@ class files {
                 $res = $this->updateFile();
                 if ($res){
                     session::setActionMessage(
-                            lang::translate('files_file_edited'));
+                            lang::translate('File was edited'));
                     http::locationHeader($redirect);
                 } else {
                     html::errors(self::$errors);

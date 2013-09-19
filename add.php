@@ -13,10 +13,10 @@ if (!moduleloader::includeRefrenceModule()){
 // we now have a refrence module and a parent id wo work from.
 $link = moduleloader::$referenceLink;
 
-$headline = lang::translate('files_add_file') . MENU_SUB_SEPARATOR_SEC . $link;
+$headline = lang::translate('Add file') . MENU_SUB_SEPARATOR_SEC . $link;
 html::headline($headline);
 
-template::setTitle(lang::translate('files_add_file'));
+template::setTitle(lang::translate('Add file'));
 $options = moduleloader::getReferenceInfo();
 
 // set parent modules menu
