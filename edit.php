@@ -1,6 +1,6 @@
 <?php
 
-if (!session::checkAccessControl('files_allow_edit')){
+if (!session::checkAccessFromModuleIni('files_allow_edit')){
     return;
 }
 
