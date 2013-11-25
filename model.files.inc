@@ -109,6 +109,7 @@ class files {
         }
         
         $values = db::prepareToPost();
+        $values['user_id'] = session::getUserId();
         $values['parent_id'] = self::$options['parent_id'];
         $values['reference'] = self::$options['reference'];
         $options['maxsize'] = self::$options['maxsize'];
@@ -338,6 +339,7 @@ class files {
             $values['file'] = $fp;
             $values['title'] = $_FILES['file']['name'];
             $values['mimetype'] = $_FILES['file']['type'];
+            $values['user_id'] = session::getUserId();
 
             $bind = array('file' => PDO::PARAM_LOB);
         }
