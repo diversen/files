@@ -4,3 +4,5 @@ files_allow_edit = 'admin'
 files_max_size = 60000000
 ;use uniqids. Easier to serve files to individual users. 
 files_use_uniqid = 1
+; redirect to parent after insert
+files_redirect_parent = 1

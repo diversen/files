@@ -353,8 +353,14 @@ class files {
      */
     public function viewFileFormInsert(){
         
+        //print_r(self::$options);
+        //echo 
+        if (config::getModuleIni('files_redirect_parent')) {
+             $redirect = moduleloader_reference::getParentEditUrlFromOptions(self::$options);
+        } else {
+            $redirect = moduleloader::buildReferenceURL('/files/add', self::$options);
+        }
         
-        $redirect = moduleloader::buildReferenceURL('/files/add', self::$options);
         if (isset($_POST['submit'])){
             $this->validateInsert();
             if (!isset(self::$errors)){
