@@ -193,11 +193,25 @@ class files {
      * @return string   content to be displayed
      */
     public static function subModuleAdminOption ($options){
-        $str = "";
         $url = moduleloader::buildReferenceURL('/files/add', $options);
         $add_str= lang::translate('Edit files');
-        $str.= html::createLink($url, $add_str);
+        $str = html::createLink($url, $add_str);
         return $str;
+    }
+    
+    /**
+     * get admin options as ary ('text', 'url', 'link') when operating as a sub module
+     * @param array $options
+     * @return array $ary  
+     */
+    public static function subModuleAdminOptionAry ($options){
+        $ary = array ();
+        $url = moduleloader::buildReferenceURL('/files/add', $options);
+        $text = lang::translate('Edit files');
+        $ary['link'] = html::createLink($url, $text);
+        $ary['url'] = $url;
+        $ary['text'] = $text;
+        return $ary;
     }
     
     
