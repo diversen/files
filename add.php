@@ -32,7 +32,6 @@ html::headline($headline);
 
 template::setTitle(lang::translate('Add file'));
 
-
 // set parent modules menu
 layout::setMenuFromClassPath($options['reference']);
 
