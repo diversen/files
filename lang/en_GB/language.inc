@@ -19,7 +19,7 @@ $_COS_LANG_MODULE['File was added'] = 'File was added';
 $_COS_LANG_MODULE['File was deleted'] = 'File was deleted';
 $_COS_LANG_MODULE['File was edited'] = 'File was edited';
 
-// Translation of file /modules/files/add.php
-
-
 // Translation of file /modules/files/edit.php
+
+
+// Translation of file /modules/files/add.php
