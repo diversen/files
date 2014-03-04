@@ -114,9 +114,9 @@ class files {
         $values['reference'] = self::$options['reference'];
         $options['maxsize'] = self::$options['maxsize'];
         
-        $fp = uploadBlob::getFP('file', $options);
+        $fp = upload_blob::getFP('file', $options);
         if (!$fp) {
-            self::$errors = uploadBlob::$errors;
+            self::$errors = upload_blob::$errors;
             return false;
         }
         $values['file'] = $fp;
@@ -345,9 +345,9 @@ class files {
             $options['filename'] = 'file';
             $options['maxsize'] = self::$options['maxsize'];
             
-            $fp = uploadBlob::getFP('file', $options);
+            $fp = upload_blob::getFP('file', $options);
             if (!$fp) {
-                self::$errors = uploadBlob::$errors;
+                self::$errors = upload_blob::$errors;
                 return false;
             }
             $values['file'] = $fp;
