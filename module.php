@@ -175,6 +175,12 @@ class files {
         return $final;
     }
     
+    public function deleteAll($parent, $reference){
+        $search = array ('parent_id =' => $parent, 'reference =' => $reference);
+        $res = db_q::delete(self::$fileTable)->filterArray($search)->exec();
+        return $res;
+    }
+    
     /**
      * method for adding pre content when files is used as a sub module. 
      * e.g. in content or blog. 
@@ -434,3 +440,5 @@ class files {
         $this->viewFileForm('update', self::$fileId);
     }
 }
+
+class files_module extends files {}
