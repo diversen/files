@@ -1,5 +1,6 @@
 <?php
 
+use diversen\upload;
 /**
  * model file for doing file uploads
  *
@@ -9,7 +10,7 @@
 /**
  * @ignore
  */
-include_once "coslib/upload.php";
+//include_once "coslib/upload.php";
 
 /**
  * class content files is used for keeping track of file changes
