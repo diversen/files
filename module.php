@@ -1,6 +1,7 @@
 <?php
 
-use diversen\upload;
+use diversen\upload\blob as upload_blob;
+
 /**
  * model file for doing file uploads
  *
