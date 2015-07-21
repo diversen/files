@@ -1,6 +1,7 @@
 <?php
 
 use diversen\upload\blob as upload_blob;
+use diversen\db\q as db_q;
 
 /**
  * model file for doing file uploads
