@@ -15,6 +15,7 @@ $link = moduleloader::$referenceLink;
 
 $options = moduleloader::getReferenceInfo();
 
+
 $allow = config::getModuleIni('files_allow_edit');
 
 // if allow is set to user - this module only allow user to edit his own images
