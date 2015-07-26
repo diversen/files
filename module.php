@@ -43,7 +43,7 @@ class files {
         self::$options = $options;
         
         if (!isset($options['maxsize'])) {
-            $maxsize = config::getModuleIni('files_max_size');
+            $maxsize = conf::getModuleIni('files_max_size');
             if ($maxsize) {
                 self::$options['maxsize'] = $maxsize;
             }
@@ -90,7 +90,7 @@ class files {
         html::label('abstract', lang::translate('Abstract'));
         html::textareaSmall('abstract');
         
-        $bytes = config::getModuleIni('files_max_size');
+        $bytes = conf::getModuleIni('files_max_size');
         html::fileWithLabel('file', $bytes);
         
         html::submit('submit', $submit);
@@ -107,7 +107,7 @@ class files {
      */
     public function insertFile ($options = array ()) {
         
-        if (config::getModuleIni('files_use_uniqid') == 1) {
+        if (conf::getModuleIni('files_use_uniqid') == 1) {
             $options['uniqid'] = true;
         }
         
@@ -378,7 +378,7 @@ class files {
         
         //print_r(self::$options);
         //echo 
-        if (config::getModuleIni('files_redirect_parent')) {
+        if (conf::getModuleIni('files_redirect_parent')) {
              $redirect = moduleloader_reference::getParentEditUrlFromOptions(self::$options);
         } else {
             $redirect = moduleloader::buildReferenceURL('/files/add', self::$options);

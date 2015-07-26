@@ -9,7 +9,7 @@
 moduleloader::includeModule('files');
 $content_file = new files();
 
-if (config::getModuleIni('files_use_uniqid') == 1) {
+if (conf::getModuleIni('files_use_uniqid') == 1) {
     $file = $content_file->getFileFromTitle(uri::fragment(3));
 } else {
     files::setFileId($frag = 2);
