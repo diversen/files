@@ -14,8 +14,6 @@ $link = moduleloader::$referenceLink;
 $options = moduleloader::getReferenceInfo();
 $allow = conf::getModuleIni('files_allow_edit');
 
-
-
 // if allow is set to user - this module only allow user to edit his own images
 if ($allow == 'user') {
     if (!user::ownID('files', $options['inline_parent_id'], session::getUserId())) {
