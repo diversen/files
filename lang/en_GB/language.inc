@@ -1,21 +1,14 @@
 <?php
 
 
-// Translation of file /modules/files/delete.php
-
-$_COS_LANG_MODULE['Delete file'] = 'Delete file';
-$_COS_LANG_MODULE['Add file'] = 'Add file';
-
-// Translation of file /modules/files/add.php
-
-
-// Translation of file /modules/files/edit.php
-
-$_COS_LANG_MODULE['Edit file'] = 'Edit file';
-
 // Translation of file /modules/files/module.php
 
+$_COS_LANG_MODULE['Add file'] = 'Add file';
+$_COS_LANG_MODULE['Edit file'] = 'Edit file';
+$_COS_LANG_MODULE['Delete file'] = 'Delete file';
 $_COS_LANG_MODULE['Delete'] = 'Delete';
+$_COS_LANG_MODULE['Update'] = 'Update';
+$_COS_LANG_MODULE['Add'] = 'Add';
 $_COS_LANG_MODULE['Abstract'] = 'Abstract';
 $_COS_LANG_MODULE['No file was specified'] = 'No file was specified';
 $_COS_LANG_MODULE['Edit files'] = 'Edit files';

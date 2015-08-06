@@ -229,10 +229,10 @@ class files {
             $values = self::getSingleFileInfo($id);
             html::init($values, 'submit');
             $legend = lang::translate('Edit file');
-            $submit = lang::system('system_submit_update');
+            $submit = lang::translate('Update');
         } else {
             $legend = lang::translate('Add file');
-            $submit = lang::system('system_submit_add');
+            $submit = lang::translate('Add');
         }
 
         html::legend($legend);
