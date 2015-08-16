@@ -61,7 +61,8 @@ class module {
             ('parent_id' => $_GET['parent_id'],
             'return_url' => $_GET['return_url'],
             'reference' => $_GET['reference'],
-            'query' => $_SERVER['QUERY_STRING']);
+            'query' => parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY)
+        );
         return $options;
     }
     
@@ -143,6 +144,8 @@ class module {
             return false;
         }
 
+        layout::setMenuFromClassPath($options['reference']);
+        
         self::setHeadlineTitle('add');
 
         // display files module content
@@ -165,6 +168,7 @@ class module {
             return;
         }
 
+        layout::setMenuFromClassPath($options['reference']);
         self::setHeadlineTitle('delete');
         self::init($options);
         self::viewFileFormDelete();
@@ -184,6 +188,7 @@ class module {
             return;
         } 
         
+        layout::setMenuFromClassPath($options['reference']);
         self::setHeadlineTitle('edit');
 
         self::init($options);
@@ -572,7 +577,6 @@ class module {
      */
     public static function displayFiles($options){
 
-        
         // get info about all filess
         $rows = self::getAllFilesInfo($options);
         $str = "";
@@ -815,8 +819,7 @@ class module {
     
     public static function redirectImageMain ($options) {
         $url = "/files/add/?$options[query]";
-        http::locationHeader($url);
-        
+        http::locationHeader($url);   
     }
 
     /**
