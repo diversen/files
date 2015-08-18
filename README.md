@@ -1,9 +1,9 @@
-### About
+# Files
 
 Files module which is mostly used as a sub module. E.g. you want the ability
 to add files to another module, then you can use this module. 
 
-### Configuration
+# Configuration
 
     ; who can edit files
     files_allow_edit = 'admin'

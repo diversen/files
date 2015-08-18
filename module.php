@@ -31,7 +31,6 @@ class module {
     public static $errors = null;
     public static $status = null;
     public static $parent_id;
-
     public static $maxsize = 2000000; // 2 mb max size
     public static $options = array();
     public static $path = '/files';
