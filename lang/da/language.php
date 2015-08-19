@@ -2,17 +2,22 @@
 
 $LANG = array();
 
-$LANG['Add file'] = 'Tilføj fil';
-$LANG['Edit file'] = 'Rediger fil';
-$LANG['Delete file'] = 'Slet fil';
+$LANG['Add files'] = 'Tilføj filer';
+$LANG['Edit files'] = 'Rediger filer';
+$LANG['Delete files'] = 'Slet filer';
+$LANG['Go back'] = 'Gå tilbage';
+$LANG['File was added'] = 'Fil tilføjes';
+$LANG['Images'] = 'Billeder';
+$LANG['Image deleted'] = 'Billede slettet';
 $LANG['Delete'] = 'Slet';
 $LANG['Update'] = 'Opdatering';
 $LANG['Add'] = 'Tilføje';
+$LANG['Image width in pixels, e.g. 100'] = 'Billede bredde i pixels, fx 100';
 $LANG['Abstract'] = 'Abstrakt';
 $LANG['No file was specified'] = 'Ingen fil blev angivet';
-$LANG['Edit files'] = 'Rediger filer';
 $LANG['Download'] = 'Hent';
 $LANG['Edit'] = 'Edit';
-$LANG['File was added'] = 'Fil tilføjes';
-$LANG['File was deleted'] = 'Fil blev slettet';
-$LANG['File was edited'] = 'Filen blev redigeret';
+$LANG['Image was added'] = 'Billede blev tilsat';
+$LANG['Image was deleted'] = 'Billede blev slettet';
+$LANG['Image was updated'] = 'Billede blev opdateret';
+$LANG['Access denied'] = 'Adgang nægtet';
