@@ -554,16 +554,14 @@ class module {
      * @return string  
      */
     public static function subModuleAdminOption ($options){
-        $str = "";
-        
 
         $url = self::$path . "/add?" . http_build_query($options);
-        $extra = null;
+        $extra = array ();
         if (isset($options['options'])) {
             $extra = $options['options'];
         }
         
-        return html::createLink($url, lang::translate('Add files'), $extra); //$url;
+        return html::createLink($url, lang::translate('Add files'), $extra); 
 
     }
 
