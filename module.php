@@ -49,6 +49,31 @@ class module {
             self::$allow = conf::getModuleIni('files_allow_edit');
          }
     }
+    
+        /**
+     * Get uploaded files as a organized array
+     * @return array $ary
+     */
+    public static function getUploadedFilesArray () {
+                
+        $ary = array ();
+        foreach ($_FILES['files']['name'] as $key => $name) {
+            $ary[$key]['name'] = $name;
+        }
+        foreach ($_FILES['files']['type'] as $key => $type) {
+            $ary[$key]['type'] = $type;
+        }
+        foreach ($_FILES['files']['tmp_name'] as $key => $tmp_name) {
+            $ary[$key]['tmp_name'] = $tmp_name;
+        }
+        foreach ($_FILES['files']['error'] as $key => $error) {
+            $ary[$key]['error'] = $error;
+        }
+        foreach ($_FILES['files']['size'] as $key => $size) {
+            $ary[$key]['size'] = $size;
+        }
+        return $ary;
+    }
 
     
     /**
@@ -134,6 +159,11 @@ class module {
      * @return mixed
      */
     public function addAction() {
+        
+        if (!isset($_GET['parent_id'], $_GET['return_url'], $_GET['reference'] )) { 
+            moduleloader::setStatus(403);
+            return false;
+        }
         
         // get options from QUERY
         $options = self::getOptions();
@@ -227,50 +257,6 @@ class module {
         echo $h->fileHtml5($url);
     }
 
-    /**
-     * ajax action 
-     * uploads from an ajax request. 
-     */
-    public function ajaxAction() {
-        
-        // check basic access
-        if (!session::checkAccessFromModuleIni('files_allow_edit')) {
-            moduleloader::setStatus(403);
-            echo lang::translate("Access denied");
-            die();
-        }
-
-        // if user - check if user owns parent reference
-        $allow = conf::getModuleIni('files_allow_edit');
-        if ($allow == 'user') {
-
-            //$table = moduleloader::moduleReferenceToTable($_GET['reference']);
-            if (!user::ownID('files', $_GET['parent_id'], session::getUserId())) {
-                moduleloader::setStatus(403);
-                echo lang::translate("Access denied");
-                die();
-            }
-        }
-
-        $options = array();
-        $options['parent_id'] = $_GET['parent_id'];
-        $options['reference'] = $_GET['reference'];
-
-        // insert files
-        self::init($options);
-        self::validateInsert();
-        if (!isset(self::$errors)) {
-            $res = @self::insertFile();
-            if ($res) {
-                echo lang::translate('File was added');
-            } else {
-                echo reset(self::$errors);
-            }
-        } else {
-            echo reset(self::$errors);
-        }
-        die();
-    }
     
     /**
      * admin action for checking user files uploads
@@ -393,10 +379,12 @@ class module {
             
             $legend = lang::translate('Edit files');
             $submit = lang::translate('Update');
+            self::$options['multiple'] = false;
         } else {
             $h->init(html::specialEncode($_POST), 'submit'); 
             $legend = lang::translate('Add files');
             $submit = lang::translate('Add');
+
             
             
             
@@ -404,14 +392,17 @@ class module {
         
         $h->legend($legend);
 
-
-        if (conf::getModuleIni('files_user_set_scale')) {
-            $h->label('scale_size', lang::translate('Image width in pixels, e.g. 100'));
-            $h->text('scale_size');
-        }
-
         $bytes = conf::getModuleIni('files_max_size');
-        $h->fileWithLabel('file', $bytes);
+        if (isset(self::$options['multiple']) && self::$options['multiple'] == false) {
+            unset(self::$options['multiple']);
+        } else {
+            self::$options['multiple'] = "multiple";
+        }
+        
+        if (!isset($id)) {
+            $h->fileWithLabel('files[]', $bytes, self::$options);
+        }
+        
 
         $h->label('abstract', lang::translate('Abstract'));
         $h->textareaSmall('abstract');
@@ -462,7 +453,7 @@ class module {
      *
      * @return boolean true on success or false on failure
      */
-    public static function insertFile ($input = 'file') {
+    public static function insertFile ($file) {
         if (conf::getModuleIni('files_use_uniqid') == 1) {
             $options['uniqid'] = true;
         }
@@ -471,9 +462,10 @@ class module {
         $values['user_id'] = session::getUserId();
         $values['parent_id'] = self::$options['parent_id'];
         $values['reference'] = self::$options['reference'];
-        $options['maxsize'] = self::$options['maxsize'];
+        
+        $options['maxsize'] = self::$maxsize;
 
-        $fp = blob::getFP('file', $options);
+        $fp = blob::getFP($file, $options);
         if (!$fp) {
             self::$errors = blob::$errors;
             return false;
@@ -483,15 +475,37 @@ class module {
         if (isset($options['uniqid'])) {
             $values['title'] = md5(uniqid());
         } else {
-            $values['title'] = $_FILES['file']['name'];
+            $values['title'] = $file['name'];
         }
 
-        $values['mimetype'] = $_FILES['file']['type'];
+        $values['mimetype'] = $file['type'];
         $bind = array('file' => PDO::PARAM_LOB);
 
         $db = new db();
         $res = $db->insert(self::$fileTable, $values, $bind);
         return $res;
+    }
+    
+    /**
+     * method for inserting a module into the database
+     * (access control is cheched in controller file)
+     *
+     * @return boolean true on success or false on failure
+     */
+    public static function insertFiles ($input = 'files') {
+        
+        $_POST = html::specialDecode($_POST);
+        
+        $ary = self::getUploadedFilesArray();
+        foreach($ary as $file) {
+
+            $res = self::insertFile($file);
+            if (!$res) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -515,9 +529,9 @@ class module {
      * just check if there is a file. 
      * @param type $mode 
      */
-    public static function validateInsert($mode = false){
+    public function validateInsert($mode = false){
         if ($mode != 'update') {
-            if (empty($_FILES['file']['name'])){
+            if (empty($_FILES['files']['name']['0'])){
                 self::$errors[] = lang::translate('No file was specified');
             }
         }
@@ -561,7 +575,7 @@ class module {
             $extra = $options['options'];
         }
         
-        return html::createLink($url, lang::translate('Add files'), $extra); 
+        return html::createLink($url, lang::translate('Files'), $extra); 
 
     }
 
@@ -690,53 +704,10 @@ class module {
     public static function updateFile() {
 
         $id = uri::fragment(2);
-        $options = self::getOptions();
-
-        $med_size = self::getMedSize();
         $values = db::prepareToPost();
-
-
-        if (!empty($_FILES['file']['name'])) {
-            $options['filename'] = 'file';
-            $options['maxsize'] = self::$maxsize;
-            $options['allow_mime'] = self::$allowMime;
-
-            // get fp - will also check for error in upload
-            $fp = blob::getFP('file', $options);
-            if (!$fp) {
-                self::$errors = blob::$errors;
-                return false;
-            }
-
-            $values['file_org'] = $fp;
-
-            if (empty($med_size)) {
-                $med_size = conf::getModuleIni('files_scale_width');
-            }
-
-            self::scaleImage(
-                    $_FILES['file']['tmp_name'], $_FILES['file']['tmp_name'] . "-med", $med_size);
-            $fp_med = fopen($_FILES['file']['tmp_name'] . "-med", 'rb');
-            $values['file'] = $fp_med;
-
-            self::scaleImage(
-                    $_FILES['file']['tmp_name'], $_FILES['file']['tmp_name'] . "-thumb", conf::getModuleIni('files_scale_width_thumb'));
-            $fp_thumb = fopen($_FILES['file']['tmp_name'] . "-thumb", 'rb');
-
-            $values['file_thumb'] = $fp_thumb;
-
-            $values['title'] = $_FILES['file']['name'];
-            $values['mimetype'] = $_FILES['file']['type'];
-            $values['parent_id'] = $options['parent_id'];
-            $values['reference'] = $options['reference'];
-
-            $bind = array(
-                'file_org' => PDO::PARAM_LOB,
-                'file' => PDO::PARAM_LOB,
-                'file_thumb' => PDO::PARAM_LOB,);
-        }
+        
         $db = new db();
-        $res = $db->update(self::$fileTable, $values, $id, $bind);
+        $res = $db->update(self::$fileTable, $values, $id);
         return $res;
     }
 
@@ -755,7 +726,7 @@ class module {
         if (isset($_POST['submit'])){
             self::validateInsert();
             if (!isset(self::$errors)){
-                $res = self::insertFile($options);
+                $res = self::insertFiles($options);
                 if ($res){
                     session::setActionMessage(lang::translate('Image was added'));
                     http::locationHeader($redirect);
@@ -779,12 +750,12 @@ class module {
         if (isset($_POST['submit'])){
             self::validateInsert();
             if (!isset(self::$errors)){
-                $res = self::insertFile();
+                $res = self::insertFiles();
                 if ($res){
                     session::setActionMessage(lang::translate('Image was added'));
-                    self::redirectImageMain($options);
+                    self::redirectFilesMain($options);
                 } else {
-                    html::errors(self::$errors);
+                    echo html::getErrors(self::$errors);
                 }
             } else {
                 html::errors(self::$errors);
@@ -805,7 +776,7 @@ class module {
                 $res = self::deleteFile($id);
                 if ($res){
                     session::setActionMessage(lang::translate('Image was deleted'));
-                    self::redirectImageMain($options);
+                    self::redirectFilesMain($options);
                 }
             } else {
                 html::errors(self::$errors);
@@ -814,7 +785,11 @@ class module {
         self::viewFileForm('delete', $id);
     }
     
-    public static function redirectImageMain ($options) {
+    /**
+     * Redrecit to main page
+     * @param array $options
+     */
+    public static function redirectFilesMain ($options) {
         $url = "/files/add/?$options[query]";
         http::locationHeader($url);   
     }
@@ -830,7 +805,7 @@ class module {
                 $res = self::updateFile();
                 if ($res){
                     session::setActionMessage(lang::translate('Image was updated'));
-                    self::redirectImageMain($options);
+                    self::redirectFilesMain($options);
                 } else {
                     html::errors(self::$errors);
                 }
