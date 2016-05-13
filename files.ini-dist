@@ -3,6 +3,6 @@ files_allow_edit = 'admin'
 ; max file size in bytes - 60MB
 files_max_size = 60000000
 ;use uniqids. Easier to serve files to individual users. 
-files_use_uniqid = 1
+files_use_uniqid = 0
 ; redirect to parent after insert
 files_redirect_parent = 1
