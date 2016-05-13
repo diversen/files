@@ -412,13 +412,49 @@ class module {
         echo $h->getStr();
     }
     
-    /**
-     * return json encoded files rows from reference and parent_id
-     * @return string $json
+        /**
+     * Note: All images are public
+     * Expose images in JSON format
+     * @return type
      */
-    public static function rpcServer () {
-        
+    public function rpcAction () {
 
+        // Check for sane options
+        if (!isset($_GET['parent_id'], $_GET['reference'] )) { 
+            return false;
+        }
+        
+        $reference = $_GET['reference'];
+        $parent_id = $_GET['parent_id'];
+        
+        // Fine tuning of access can be set in image/config.php
+        if (method_exists('modules\files\config', 'checkAccess')) {
+            $check = new \modules\files\config();
+            if (!$check->checkAccess($parent_id)) {
+                moduleloader::setStatus(403);
+                return false;
+            }
+        }
+        
+        
+        // Get rows
+        $rows = $this->getAllFilesInfo(
+                array(
+                    'reference' => $reference, 
+                    'parent_id' => $parent_id)
+                );
+        
+        foreach ($rows as $key => $val) {
+            $rows[$key]['url_m'] = "/files/download/$val[id]/" . strings::utf8SlugString($val['title']);
+            $rows[$key]['url_s'] = "/files/download/$val[id]/" . strings::utf8SlugString($val['title']) . "?size=file_thumb";
+            $str = strings::sanitizeUrlRigid(html::specialDecode($val['abstract']));
+            $rows[$key]['title'] = $str; 
+        }
+        
+        $files = array ('files' => $rows);
+        echo json_encode($files);
+        
+        die;
     }
     
     /**
