@@ -6,6 +6,7 @@ $LANG['Add files'] = 'Tilføj filer';
 $LANG['Edit files'] = 'Rediger filer';
 $LANG['Delete files'] = 'Slet filer';
 $LANG['Go back'] = 'Gå tilbage';
+$LANG['Access forbidden!'] = 'Adgang forbudt!';
 $LANG['Images'] = 'Billeder';
 $LANG['Image deleted'] = 'Billede slettet';
 $LANG['Delete'] = 'Slet';
