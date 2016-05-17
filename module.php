@@ -90,24 +90,45 @@ class module {
         return $options;
     }
     
-    /**
-     * check access to module based on options and blog ini settings 
-     * @param array $options
-     * @return void
+        /**
+     * Check access to module based on options and ini settings and action param
+     * @param string $action 'add', 'edit', 'delete' (NOT used yet)
+     * @return boolean $res true if allowed else false
      */
-    public function checkAccess ($options) {
+    public function checkAccess ($action = 'add') {
         
-        // check access
-        if (!session::checkAccessClean($this->allow)) {
+        // Options used ['parent_id', 'reference']
+        $options = $this->getOptions();
+        if (!$options) {
+            return false;
+        }
+    
+        // Admin user is always allowed
+        if (session::isAdmin()) {
+            return true;
+        }
+        
+        // Who is allowed - e.g. user or admin 
+        // If 'admin' then only admin users can add images
+        $allow = conf::getModuleIni('files_allow_edit');
+        if (!session::checkAccessClean($allow)) {
             return false;
         }
 
-        // if allow is set to user - this module only allow user to edit his filess
-        // to references and parent_ids which he owns
-        if ($this->allow == 'user') {
-            $table = moduleloader::moduleReferenceToTable($options['reference']);
-            if (!user::ownID($table, $options['parent_id'], session::getUserId())) {
-                moduleloader::setStatus(403);
+        // Fine tuning of access can be set in image/config.php
+        if (method_exists('modules\files\config', 'checkAccess')) {
+            $check = new \modules\image\config();
+            return $check->checkAccess($options['parent_id']);
+        }
+        
+        
+        // If allow is set to user - this module only allow user to edit the images
+        // he owns - based on 'reference' and 'parent_id'
+        if ($allow == 'user') {
+            if (!admin::tableExists($options['reference'])) {
+                return false;
+            }
+            if (!user::ownID($options['reference'], $options['parent_id'], session::getUserId())) {
                 return false;
             }
         }
