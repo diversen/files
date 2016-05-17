@@ -28,25 +28,25 @@ use PDO;
 class module {
 
 
-    public static $errors = null;
-    public static $status = null;
-    public static $parent_id;
-    public static $maxsize = 2000000; // 2 mb max size
-    public static $options = array();
-    public static $path = '/files';
-    public static $fileTable = 'files';
-    public static $scaleWidth;
-    public static $allow;
-    public static $allowMime = array ();
+    public $errors = null;
+    public $status = null;
+    public $parent_id;
+    public $maxsize = 2000000; // 2 mb max size
+    public $options = array();
+    public $path = '/files';
+    public $fileTable = 'files';
+    public $scaleWidth;
+    public $allow;
+    public $allowMime = array ();
 
     /**
      *
      * constructor sets init vars
      */
     function __construct($options = null){
-         self::$options = $options;
+         $this->options = $options;
          if (!isset($options['allow'])) {
-            self::$allow = conf::getModuleIni('files_allow_edit');
+            $this->allow = conf::getModuleIni('files_allow_edit');
          }
     }
     
@@ -54,7 +54,7 @@ class module {
      * Get uploaded files as a organized array
      * @return array $ary
      */
-    public static function getUploadedFilesArray () {
+    public function getUploadedFilesArray () {
                 
         $ary = array ();
         foreach ($_FILES['files']['name'] as $key => $name) {
@@ -80,7 +80,7 @@ class module {
      * get options from QUERY
      * @return array $options
      */
-    public static function getOptions() {
+    public function getOptions() {
         $options = array
             ('parent_id' => $_GET['parent_id'],
             'return_url' => $_GET['return_url'],
@@ -95,16 +95,16 @@ class module {
      * @param array $options
      * @return void
      */
-    public static function checkAccess ($options) {
+    public function checkAccess ($options) {
         
         // check access
-        if (!session::checkAccessClean(self::$allow)) {
+        if (!session::checkAccessClean($this->allow)) {
             return false;
         }
 
         // if allow is set to user - this module only allow user to edit his filess
         // to references and parent_ids which he owns
-        if (self::$allow == 'user') {
+        if ($this->allow == 'user') {
             $table = moduleloader::moduleReferenceToTable($options['reference']);
             if (!user::ownID($table, $options['parent_id'], session::getUserId())) {
                 moduleloader::setStatus(403);
@@ -114,26 +114,13 @@ class module {
         return true;
     }
     
-    
-    /**
-     * method for adding pre content when files is used as a sub module. 
-     * e.g. in content or blog. 
-     * @param type $options
-     * @return string   content to be displayed
-     */
-    public static function subModulePreContent($options) {
-        $str = self::displayFilesPublic($options);
-        return $str;
-    }
-
-    
     /**
      * set a headline and page title based on action
      * @param string $action 'add', 'edit', 'delete'
      */
-    public static function setHeadlineTitle ($action = '') {
+    public function setHeadlineTitle ($action = '') {
 
-        $options = self::getOptions();
+        $options = $this->getOptions();
         if ($action == 'add') {
             $title = lang::translate('Add files');
         }
@@ -166,23 +153,23 @@ class module {
         }
         
         // get options from QUERY
-        $options = self::getOptions();
+        $options = $this->getOptions();
         
-        if (!self::checkAccess($options)) {
+        if (!$this->checkAccess($options)) {
             moduleloader::setStatus(403);
             return false;
         }
 
         layout::setMenuFromClassPath($options['reference']);
         
-        self::setHeadlineTitle('add');
+        $this->setHeadlineTitle('add');
 
         // display files module content
-        self::init($options);
-        self::viewFileFormInsert($options);
+        $this->init($options);
+        $this->viewFileFormInsert($options);
         
         // display files
-        echo self::displayFiles($options);
+        echo $this->displayFiles($options);
     }
 
 
@@ -191,16 +178,16 @@ class module {
      * @return type
      */
     public function deleteAction() {
-        $options = self::getOptions();
-        if (!self::checkAccess($options)) {
+        $options = $this->getOptions();
+        if (!$this->checkAccess($options)) {
             moduleloader::setStatus(403);
             return;
         }
 
         layout::setMenuFromClassPath($options['reference']);
-        self::setHeadlineTitle('delete');
-        self::init($options);
-        self::viewFileFormDelete();
+        $this->setHeadlineTitle('delete');
+        $this->init($options);
+        $this->viewFileFormDelete();
     }
 
 
@@ -209,19 +196,19 @@ class module {
      * @return void
      */
     public function editAction() {
-        $options = self::getOptions();
+        $options = $this->getOptions();
         
         // check access
-        if (!self::checkAccess($options)) {
+        if (!$this->checkAccess($options)) {
             moduleloader::setStatus(403);
             return;
         } 
         
         layout::setMenuFromClassPath($options['reference']);
-        self::setHeadlineTitle('edit');
+        $this->setHeadlineTitle('edit');
 
-        self::init($options);
-        self::viewFileFormUpdate($options);
+        $this->init($options);
+        $this->viewFileFormUpdate($options);
     }
 
     /**
@@ -230,20 +217,33 @@ class module {
     public function downloadAction() {
         
         $id = uri::fragment(2);
-        //die;
-        $size = self::getImageSize(); 
-        $file = self::getFile($id, $size);
+        $file = $this->getFile($id);
 
         if (empty($file)) {
             moduleloader::setStatus(404);
             return;
         }
         
+        
+        // Fine tuning of access can be set in image/config.php
+        if (method_exists('modules\files\config', 'checkAccessDownload')) {
+            
+            $check = new \modules\files\config();
+            $res = $check->checkAccessDownload($id);
+            
+            if (!$res) {
+                header('HTTP/1.0 403 Forbidden');
+                echo lang::translate('Access forbidden!');
+                die();
+            }
+        }
+
+        
         http::cacheHeaders();
         if (isset($file['mimetype']) && !empty($file['mimetype'])) {
             header("Content-type: $file[mimetype]");
         }
-        echo $file[$size];
+        echo $file['file'];
         die;
     
     }
@@ -270,7 +270,7 @@ class module {
         layout::attachMenuItem('module', 
                 array(
                     'title' => lang::translate('Images'), 
-                    'url' => self::$path . '/admin'));
+                    'url' => $this->path . '/admin'));
         
         $per_page = 10;
         $total = q::numRows('files')->fetch();
@@ -279,7 +279,7 @@ class module {
         $from = @$_GET['from'];
         if (isset($_GET['delete'])) {
             $this->deleteFile($_GET['delete']);    
-            http::locationHeader(self::$path . "/admin?from=$from", 
+            http::locationHeader($this->path . "/admin?from=$from", 
                     lang::translate('Image deleted'));
         }
         
@@ -291,13 +291,13 @@ class module {
         echo "<table>";
         foreach ($rows as $row) {
             echo "<tr>";
-            echo "<td>" . self::getImgTag($row, 'file_thumb') . "</td>";
+            echo "<td>" . $this->getImgTag($row, 'file_thumb') . "</td>";
             echo "<td>"; 
             echo user::getAdminLink($row['user_id']);
             echo "<br />";
             echo user::getProfileLink($row['user_id']);
             echo "<br />";
-            echo html::createLink(self::$path . "/admin?delete=$row[id]&from=$from", lang::translate('Delete files'));
+            echo html::createLink($this->path . "/admin?delete=$row[id]&from=$from", lang::translate('Delete files'));
             echo "</td>";
             echo "</tr>";
         }
@@ -310,12 +310,12 @@ class module {
      * init
      * @param type $options
      */
-    public static function init ($options = null){
-        self::$options = $options;
-        self::$scaleWidth = conf::getModuleIni('files_scale_width');
-        self::$path = '/files';
-        self::$fileTable = 'files';
-        self::$maxsize = conf::getModuleIni('files_max_size');
+    public function init ($options = null){
+        $this->options = $options;
+        $this->scaleWidth = conf::getModuleIni('files_scale_width');
+        $this->path = '/files';
+        $this->fileTable = 'files';
+        $this->maxsize = conf::getModuleIni('files_max_size');
   
     }
     
@@ -325,7 +325,7 @@ class module {
      * @param string $reference
      * @return boolean
      */
-    public static function filesExists ($id, $reference) {
+    public function filesExists ($id, $reference) {
         return q::select('files', 'id')->
                 filter('parent_id =', $id)->condition('AND')->
                 filter('reference =', $reference)->
@@ -340,10 +340,10 @@ class module {
      * @param array $options
      * @return string $html files tag
      */
-    public static function getImgTag ($row, $size = "file_org", $options = array ()) {
+    public function getImgTag ($row, $size = "file_org", $options = array ()) {
         return $img_tag = html::createHrefImage(
-                self::$path . "/download/$row[id]/$row[title]?size=file_org", 
-                self::$path . "/download/$row[id]/$row[title]?size=$size", 
+                $this->path . "/download/$row[id]/$row[title]?size=file_org", 
+                $this->path . "/download/$row[id]/$row[title]?size=$size", 
                 $options);
 
     }
@@ -356,7 +356,7 @@ class module {
     * @param string    method (update, delete or insert)
     * @param int       id (if delete or update)
     */
-    public static function viewFileForm($method, $id = null, $values = array(), $caption = null){
+    public function viewFileForm($method, $id = null, $values = array(), $caption = null){
         
         html::$doUpload = true;
         $h = new html();
@@ -374,12 +374,12 @@ class module {
         
         // update
         if (isset($id)) {
-            $values = self::getSingleFileInfo($id);
+            $values = $this->getSingleFileInfo($id);
             $h->init($values, 'submit'); 
             
             $legend = lang::translate('Edit files');
             $submit = lang::translate('Update');
-            self::$options['multiple'] = false;
+            $this->options['multiple'] = false;
         } else {
             $h->init(html::specialEncode($_POST), 'submit'); 
             $legend = lang::translate('Add files');
@@ -393,14 +393,14 @@ class module {
         $h->legend($legend);
 
         $bytes = conf::getModuleIni('files_max_size');
-        if (isset(self::$options['multiple']) && self::$options['multiple'] == false) {
-            unset(self::$options['multiple']);
+        if (isset($this->options['multiple']) && $this->options['multiple'] == false) {
+            unset($this->options['multiple']);
         } else {
-            self::$options['multiple'] = "multiple";
+            $this->options['multiple'] = "multiple";
         }
         
         if (!isset($id)) {
-            $h->fileWithLabel('files[]', $bytes, self::$options);
+            $h->fileWithLabel('files[]', $bytes, $this->options);
         }
         
 
@@ -463,15 +463,15 @@ class module {
      * @param type $size
      * @return string
      */
-    public static function getFullWebPath ($row, $size = null) {
-        $str = self::$path . "/download/$row[id]/" . strings::utf8SlugString($row['title']);
+    public function getFullWebPath ($row, $size = null) {
+        $str = $this->path . "/download/$row[id]/" . strings::utf8SlugString($row['title']);
         return $str;
     }
     
     /**
      * methoding for setting med size if allowed
      */
-    public static function getMedSize () {
+    public function getMedSize () {
         $med_size = 0;
         if (isset($_POST['scale_size']) && !empty($_POST['scale_size'])  && $_POST['scale_size'] > 0 ) {
             $med_size = (int)$_POST['scale_size']; 
@@ -489,21 +489,21 @@ class module {
      *
      * @return boolean true on success or false on failure
      */
-    public static function insertFile ($file) {
+    public function insertFile ($file) {
         if (conf::getModuleIni('files_use_uniqid') == 1) {
             $options['uniqid'] = true;
         }
 
         $values = db::prepareToPost();
         $values['user_id'] = session::getUserId();
-        $values['parent_id'] = self::$options['parent_id'];
-        $values['reference'] = self::$options['reference'];
+        $values['parent_id'] = $this->options['parent_id'];
+        $values['reference'] = $this->options['reference'];
         
-        $options['maxsize'] = self::$maxsize;
+        $options['maxsize'] = $this->maxsize;
 
         $fp = blob::getFP($file, $options);
         if (!$fp) {
-            self::$errors = blob::$errors;
+            $this->errors = blob::$errors;
             return false;
         }
         $values['file'] = $fp;
@@ -518,7 +518,7 @@ class module {
         $bind = array('file' => PDO::PARAM_LOB);
 
         $db = new db();
-        $res = $db->insert(self::$fileTable, $values, $bind);
+        $res = $db->insert($this->fileTable, $values, $bind);
         return $res;
     }
     
@@ -528,14 +528,14 @@ class module {
      *
      * @return boolean true on success or false on failure
      */
-    public static function insertFiles ($input = 'files') {
+    public function insertFiles ($input = 'files') {
         
         $_POST = html::specialDecode($_POST);
         
-        $ary = self::getUploadedFilesArray();
+        $ary = $this->getUploadedFilesArray();
         foreach($ary as $file) {
 
-            $res = self::insertFile($file);
+            $res = $this->insertFile($file);
             if (!$res) {
                 return false;
             }
@@ -551,10 +551,10 @@ class module {
      * @param type $width the x factor or width of the files
      * @return type 
      */
-    public static function scaleImage ($files, $thumb, $width){
+    public function scaleImage ($files, $thumb, $width){
         $res = filesscale::byX($files, $thumb, $width);
         if (!empty(filesscale::$errors)) { 
-            self::$errors = filesscale::$errors;
+            $this->errors = filesscale::$errors;
         }
         return $res;
     }
@@ -568,7 +568,7 @@ class module {
     public function validateInsert($mode = false){
         if ($mode != 'update') {
             if (empty($_FILES['files']['name']['0'])){
-                self::$errors[] = lang::translate('No file was specified');
+                $this->errors[] = lang::translate('No file was specified');
             }
         }
     }
@@ -581,7 +581,7 @@ class module {
      *
      */
     public function deleteFile($id){
-        $res = q::delete(self::$fileTable)->filter( 'id =', $id)->exec();
+        $res = q::delete($this->fileTable)->filter( 'id =', $id)->exec();
         return $res;
     }
     
@@ -593,7 +593,7 @@ class module {
      */
     public function deleteAll($parent, $reference) {
         $search = array('parent_id =' => $parent, 'reference =' => $reference);
-        $res = q::delete(self::$fileTable)->filterArray($search)->exec();
+        $res = q::delete($this->fileTable)->filterArray($search)->exec();
         return $res;
     }
 
@@ -605,7 +605,9 @@ class module {
      */
     public static function subModuleAdminOption ($options){
 
-        $url = self::$path . "/add?" . http_build_query($options);
+        $i = new self();
+        
+        $url = $i->path . "/add?" . http_build_query($options);
         $extra = array ();
         if (isset($options['options'])) {
             $extra = $options['options'];
@@ -622,10 +624,10 @@ class module {
      * @param array $options
      * @return string $html
      */
-    public static function displayFiles($options){
+    public function displayFiles($options){
 
         // get info about all filess
-        $rows = self::getAllFilesInfo($options);
+        $rows = $this->getAllFilesInfo($options);
         $str = "";
         foreach ($rows as $val){
             
@@ -638,12 +640,12 @@ class module {
             $link_options = array('title' => htmlspecialchars($val['abstract']));
             $str.= html::createLink($val['files_url'], $title, $link_options);
 
-            $add = self::$path . "/edit/$val[id]?" . $options['query'];
+            $add = $this->path . "/edit/$val[id]?" . $options['query'];
             $str.= MENU_SUB_SEPARATOR_SEC;
             $str.= html::createLink($add, lang::translate('Edit'));
 
             // delete link
-            $delete = self::$path . "/delete/$val[id]?" . $options['query'];
+            $delete = $this->path . "/delete/$val[id]?" . $options['query'];
             $str.= MENU_SUB_SEPARATOR;
             $str.= html::createLink($delete, lang::translate('Delete'));
 
@@ -659,10 +661,10 @@ class module {
      * @param array $options
      * @return string $html
      */
-    public static function displayFilesPublic($options){
+    public function displayFilesPublic($options){
 
         // get info about all filess
-        $rows = self::getAllFilesInfo($options);
+        $rows = $this->getAllFilesInfo($options);
         $str = '';
         foreach ($rows as $val){
             $title = htmlspecialchars($val['title']);
@@ -681,7 +683,7 @@ class module {
      * @param array $options
      * @return array $rows array of rows
      */
-    public static function getAllFilesInfo($options){
+    public function getAllFilesInfo($options){
         $db = new db();
         $search = array (
             'parent_id' => $options['parent_id'],
@@ -689,9 +691,9 @@ class module {
         );
 
         $fields = array ('id', 'parent_id', 'title', 'abstract', 'published', 'created');
-        $rows = $db->selectAll(self::$fileTable, $fields, $search, null, null, 'created', false);
+        $rows = $db->selectAll($this->fileTable, $fields, $search, null, null, 'created', false);
         foreach ($rows as $key => $row) {
-            $rows[$key]['files_url'] = self::getFullWebPath($row);
+            $rows[$key]['files_url'] = $this->getFullWebPath($row);
         } 
         
         return $rows;
@@ -702,15 +704,15 @@ class module {
      * @param int $id
      * @return array $row
      */
-    public static function getSingleFileInfo($id){
+    public function getSingleFileInfo($id){
 
         $db = new db();
         $search = array (
             'id' => $id
         );
 
-        $fields = array ('id', 'parent_id', 'title', 'abstract', 'published', 'created', 'reference');
-        $row = $db->selectOne(self::$fileTable, null, $search, $fields, null, 'created', false);
+        $fields = array ('id', 'parent_id', 'title', 'abstract', 'published', 'created', 'reference', 'user_id');
+        $row = $db->selectOne($this->fileTable, null, $search, $fields, null, 'created', false);
         return $row;
     }
 
@@ -718,18 +720,12 @@ class module {
      * method for fetching one full file row
      * @return array $row
      */
-    public static function getFile($id, $size = null){
+    public function getFile($id){
         $db = new db();
+
         
-        if (!$size) { 
-            $size = 'file';
-        }
-        if ($size != 'file' || $size != 'file_thumb' || $size != 'file_org') {
-            $size = 'file';
-        }
-        
-        $db->selectOne(self::$fileTable, 'id', $id, array($size));
-        $row = $db->selectOne(self::$fileTable, 'id', $id);
+        $db->selectOne($this->fileTable, 'id', $id);
+        $row = $db->selectOne($this->fileTable, 'id', $id);
         return $row;
     }
 
@@ -737,13 +733,13 @@ class module {
      * method for updating a module in database
      * @return boolean $res true on success or false on failure
      */
-    public static function updateFile() {
+    public function updateFile() {
 
         $id = uri::fragment(2);
         $values = db::prepareToPost();
         
         $db = new db();
-        $res = $db->update(self::$fileTable, $values, $id);
+        $res = $db->update($this->fileTable, $values, $id);
         return $res;
     }
 
@@ -751,7 +747,7 @@ class module {
      * display a insert file form
      * @param type $options
      */
-    public static function viewFileFormInsertClean($options) {
+    public function viewFileFormInsertClean($options) {
 
         if (isset($options['redirect'])) {
             $redirect = $options['redirect'];
@@ -760,72 +756,72 @@ class module {
         }
 
         if (isset($_POST['submit'])){
-            self::validateInsert();
-            if (!isset(self::$errors)){
-                $res = self::insertFiles($options);
+            $this->validateInsert();
+            if (!isset($this->errors)){
+                $res = $this->insertFiles($options);
                 if ($res){
                     session::setActionMessage(lang::translate('Image was added'));
                     http::locationHeader($redirect);
                 } else {
-                    html::errors(self::$errors);
+                    html::errors($this->errors);
                 }
             } else {
-                html::errors(self::$errors);
+                html::errors($this->errors);
             }
         }
-        self::viewFileForm('insert');
+        $this->viewFileForm('insert');
     }
     
     /**
      * view form for uploading a file.
      * @param type $options
      */
-    public static function viewFileFormInsert($options){
+    public function viewFileFormInsert($options){
 
         $redirect = $options['return_url'];
         if (isset($_POST['submit'])){
-            self::validateInsert();
-            if (!isset(self::$errors)){
-                $res = self::insertFiles();
+            $this->validateInsert();
+            if (!isset($this->errors)){
+                $res = $this->insertFiles();
                 if ($res){
                     session::setActionMessage(lang::translate('Image was added'));
-                    self::redirectFilesMain($options);
+                    $this->redirectFilesMain($options);
                 } else {
-                    echo html::getErrors(self::$errors);
+                    echo html::getErrors($this->errors);
                 }
             } else {
-                html::errors(self::$errors);
+                html::errors($this->errors);
             }
         }
-        self::viewFileForm('insert');
+        $this->viewFileForm('insert');
     }
 
     /**
      * view form for deleting files
      */
-    public static function viewFileFormDelete(){
+    public function viewFileFormDelete(){
         
         $id = uri::fragment(2);
-        $options = self::getOptions();
+        $options = $this->getOptions();
         if (isset($_POST['submit'])){
-            if (!isset(self::$errors)){
-                $res = self::deleteFile($id);
+            if (!isset($this->errors)){
+                $res = $this->deleteFile($id);
                 if ($res){
                     session::setActionMessage(lang::translate('Image was deleted'));
-                    self::redirectFilesMain($options);
+                    $this->redirectFilesMain($options);
                 }
             } else {
-                html::errors(self::$errors);
+                html::errors($this->errors);
             }
         }
-        self::viewFileForm('delete', $id);
+        $this->viewFileForm('delete', $id);
     }
     
     /**
      * Redrecit to main page
      * @param array $options
      */
-    public static function redirectFilesMain ($options) {
+    public function redirectFilesMain ($options) {
         $url = "/files/add/?$options[query]";
         http::locationHeader($url);   
     }
@@ -833,39 +829,23 @@ class module {
     /**
      * view form for updating an files
      */
-    public static function viewFileFormUpdate($options){
+    public function viewFileFormUpdate($options){
         $id = uri::fragment(2);
         if (isset($_POST['submit'])){
-            self::validateInsert('update');
-            if (!isset(self::$errors)){
-                $res = self::updateFile();
+            $this->validateInsert('update');
+            if (!isset($this->errors)){
+                $res = $this->updateFile();
                 if ($res){
                     session::setActionMessage(lang::translate('Image was updated'));
-                    self::redirectFilesMain($options);
+                    $this->redirectFilesMain($options);
                 } else {
-                    html::errors(self::$errors);
+                    html::errors($this->errors);
                 }
             } else {
-                html::errors(self::$errors);
+                html::errors($this->errors);
             }
         }
-        self::viewFileForm('update', $id);
+        $this->viewFileForm('update', $id);
     }
 
-    /**
-     * get a size of files to deliver based on $_GET['size']
-     * @return string
-     */
-    public static function getImageSize () {
-        $size = null;
-        if (!isset($_GET['size'])) {
-            $size = 'file';
-        } else {
-            $size = $_GET['size'];
-        }
-        if ($size != 'file' && $size != 'file_thumb' && $size != 'file_org') {
-            $size = 'file';
-        }
-        return $size;
-    }
 }

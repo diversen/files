@@ -1,6 +1,6 @@
 <?php
 
-namespace modules\image;
+namespace modules\files;
 
 use diversen\session;
 
@@ -30,7 +30,7 @@ class config {
     public function checkAccessDownload ($id) {
         // Get image
 
-        $i = new \modules\image\module();
+        $i = new \modules\files\module();
         $image = $i->getSingleFileInfo($id);
         if (empty($image)) {
             return false;
