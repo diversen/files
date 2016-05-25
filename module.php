@@ -649,13 +649,13 @@ class module {
 
         // get info about all filess
         $rows = $this->getAllFilesInfo($options);
-        $str = "";
+        
+        $str = '<ul class="uk-list  uk-list-striped ">';
         foreach ($rows as $val){
+            $str.= '<li>';
             
-            // generate title
-            $title = lang::translate('Download');
-            $title.= MENU_SUB_SEPARATOR_SEC;
-            $title.= htmlspecialchars($val['title']);
+            // title            
+            $title = htmlspecialchars($val['title']);
             
             // create link to files
             $link_options = array('title' => htmlspecialchars($val['abstract']));
@@ -670,9 +670,9 @@ class module {
             $str.= MENU_SUB_SEPARATOR;
             $str.= html::createLink($delete, lang::translate('Delete'));
 
-            // break
-            $str.= "<br />\n";
+            $str.= "</li>";
         }
+        $str.='</ul>';
         echo $str;
     }
     
@@ -808,7 +808,9 @@ class module {
                     session::setActionMessage(lang::translate('Image was added'));
                     $this->redirectFilesMain($options);
                 } else {
-                    echo html::getErrors($this->errors);
+                    $error = array_pop($this->errors);
+                    session::setActionMessage($error, 'system_error');
+                    $this->redirectImageMain($options);
                 }
             } else {
                 html::errors($this->errors);
