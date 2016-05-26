@@ -117,12 +117,12 @@ class module {
 
         // Fine tuning of access can be set in image/config.php
         if (method_exists('modules\files\config', 'checkAccess')) {
-            $check = new \modules\image\config();
+            $check = new \modules\files\config();
             return $check->checkAccess($options['parent_id']);
         }
         
         
-        // If allow is set to user - this module only allow user to edit the images
+        // If allow is set to user - this module only allow user to edit the files
         // he owns - based on 'reference' and 'parent_id'
         if ($allow == 'user') {
             if (!admin::tableExists($options['reference'])) {
@@ -246,7 +246,7 @@ class module {
         }
         
         
-        // Fine tuning of access can be set in image/config.php
+        // Fine tuning of access can be set in files/config.php
         if (method_exists('modules\files\config', 'checkAccessDownload')) {
             
             $check = new \modules\files\config();
@@ -279,53 +279,6 @@ class module {
     }
 
     
-    /**
-     * admin action for checking user files uploads
-     * @return boolean
-     */
-    public function adminAction () {
-        if (!session::checkAccess('admin')) {
-            return false;
-        }
-        
-        layout::attachMenuItem('module', 
-                array(
-                    'title' => lang::translate('Images'), 
-                    'url' => $this->path . '/admin'));
-        
-        $per_page = 10;
-        $total = q::numRows('files')->fetch();
-        $p = new pagination($total);
-
-        $from = @$_GET['from'];
-        if (isset($_GET['delete'])) {
-            $this->deleteFile($_GET['delete']);    
-            http::locationHeader($this->path . "/admin?from=$from", 
-                    lang::translate('Image deleted'));
-        }
-        
-        $rows = q::select('files', 'id, title, user_id')->
-                order('created', 'DESC')->
-                limit($p->from, $per_page)->
-                fetch();
-        
-        echo "<table>";
-        foreach ($rows as $row) {
-            echo "<tr>";
-            echo "<td>" . $this->getImgTag($row, 'file_thumb') . "</td>";
-            echo "<td>"; 
-            echo user::getAdminLink($row['user_id']);
-            echo "<br />";
-            echo user::getProfileLink($row['user_id']);
-            echo "<br />";
-            echo html::createLink($this->path . "/admin?delete=$row[id]&from=$from", lang::translate('Delete files'));
-            echo "</td>";
-            echo "</tr>";
-        }
-        echo "</table>"; 
-        echo $p->getPagerHTML();
-    }
-    
 
     /**
      * init
@@ -351,22 +304,6 @@ class module {
                 filter('parent_id =', $id)->condition('AND')->
                 filter('reference =', $reference)->
                 fetchSingle();
-    }
-
-    
-    /**
-     * get a files html tag
-     * @param array $row
-     * @param string $size
-     * @param array $options
-     * @return string $html files tag
-     */
-    public function getImgTag ($row, $size = "file_org", $options = array ()) {
-        return $img_tag = html::createHrefImage(
-                $this->path . "/download/$row[id]/$row[title]?size=file_org", 
-                $this->path . "/download/$row[id]/$row[title]?size=$size", 
-                $options);
-
     }
 
    /**
@@ -405,10 +342,6 @@ class module {
             $h->init(html::specialEncode($_POST), 'submit'); 
             $legend = lang::translate('Add files');
             $submit = lang::translate('Add');
-
-            
-            
-            
         }
         
         $h->legend($legend);
@@ -778,13 +711,16 @@ class module {
 
         if (isset($_POST['submit'])){
             $this->validateInsert();
-            if (!isset($this->errors)){
+            if (empty($this->errors)){
                 $res = $this->insertFiles($options);
                 if ($res){
-                    session::setActionMessage(lang::translate('Image was added'));
+                    session::setActionMessage(lang::translate('File(s) were added'));
                     http::locationHeader($redirect);
                 } else {
-                    html::errors($this->errors);
+                    
+                    $error = array_pop($this->errors);
+                    session::setActionMessage($error, 'system_error');
+                    http::locationHeader($redirect);
                 }
             } else {
                 html::errors($this->errors);
@@ -805,12 +741,12 @@ class module {
             if (!isset($this->errors)){
                 $res = $this->insertFiles();
                 if ($res){
-                    session::setActionMessage(lang::translate('Image was added'));
+                    session::setActionMessage(lang::translate('File(s) were added'));
                     $this->redirectFilesMain($options);
                 } else {
                     $error = array_pop($this->errors);
                     session::setActionMessage($error, 'system_error');
-                    $this->redirectImageMain($options);
+                    $this->redirectFilesMain($options);
                 }
             } else {
                 html::errors($this->errors);
@@ -830,7 +766,7 @@ class module {
             if (!isset($this->errors)){
                 $res = $this->deleteFile($id);
                 if ($res){
-                    session::setActionMessage(lang::translate('Image was deleted'));
+                    session::setActionMessage(lang::translate('File was deleted'));
                     $this->redirectFilesMain($options);
                 }
             } else {
@@ -859,7 +795,7 @@ class module {
             if (!isset($this->errors)){
                 $res = $this->updateFile();
                 if ($res){
-                    session::setActionMessage(lang::translate('Image was updated'));
+                    session::setActionMessage(lang::translate('File was updated'));
                     $this->redirectFilesMain($options);
                 } else {
                     html::errors($this->errors);
