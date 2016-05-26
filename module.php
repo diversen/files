@@ -159,7 +159,7 @@ class module {
         $headline.= html::createLink($options['return_url'], lang::translate('Go back'));
 
         echo html::getHeadline($headline);
-        template::setTitle(lang::translate($title));
+        template::setTitle($title);
     }
     
     /**
