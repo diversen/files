@@ -10,13 +10,13 @@ use diversen\http;
 use diversen\lang;
 use diversen\layout;
 use diversen\moduleloader;
-use diversen\pagination;
 use diversen\session;
 use diversen\strings;
 use diversen\template;
 use diversen\upload\blob;
 use diversen\uri;
 use diversen\user;
+use diversen\db\admin;
 use PDO;
 
 /**
@@ -95,7 +95,7 @@ class module {
      * @param string $action 'add', 'edit', 'delete' (NOT used yet)
      * @return boolean $res true if allowed else false
      */
-    public function checkAccess ($action = 'add') {
+    public function checkAccess ($action = 'view') {
         
         // Options used ['parent_id', 'reference']
         $options = $this->getOptions();
@@ -116,9 +116,9 @@ class module {
         }
 
         // Fine tuning of access can be set in image/config.php
-        if (method_exists('modules\files\config', 'checkAccess')) {
+        if (method_exists('\modules\files\config', 'checkAccessParentId')) {
             $check = new \modules\files\config();
-            return $check->checkAccess($options['parent_id']);
+            return $check->checkAccessParentId($options['parent_id'], $action);
         }
         
         
@@ -176,7 +176,8 @@ class module {
         // get options from QUERY
         $options = $this->getOptions();
         
-        if (!$this->checkAccess($options)) {
+        if (!$this->checkAccess('edit')) {
+            
             moduleloader::setStatus(403);
             return false;
         }
@@ -200,7 +201,7 @@ class module {
      */
     public function deleteAction() {
         $options = $this->getOptions();
-        if (!$this->checkAccess($options)) {
+        if (!$this->checkAccess('edit')) {
             moduleloader::setStatus(403);
             return;
         }
@@ -220,7 +221,7 @@ class module {
         $options = $this->getOptions();
         
         // check access
-        if (!$this->checkAccess($options)) {
+        if (!$this->checkAccess('edit')) {
             moduleloader::setStatus(403);
             return;
         } 
@@ -247,15 +248,13 @@ class module {
         
         
         // Fine tuning of access can be set in files/config.php
-        if (method_exists('modules\files\config', 'checkAccessDownload')) {
-            
+        if (method_exists('modules\files\config', 'checkAccessId')) {
             $check = new \modules\files\config();
-            $res = $check->checkAccessDownload($id);
+            $res = $check->checkAccessId($id, 'view');
             
             if (!$res) {
-                header('HTTP/1.0 403 Forbidden');
-                echo lang::translate('Access forbidden!');
-                die();
+                moduleloader::setStatus(403);
+                return;
             }
         }
 
@@ -382,9 +381,9 @@ class module {
         $parent_id = $_GET['parent_id'];
         
         // Fine tuning of access can be set in image/config.php
-        if (method_exists('modules\files\config', 'checkAccess')) {
+        if (method_exists('modules\files\config', 'checkAccessParentId')) {
             $check = new \modules\files\config();
-            if (!$check->checkAccess($parent_id)) {
+            if (!$check->checkAccessParentId($parent_id, 'view')) {
                 moduleloader::setStatus(403);
                 return false;
             }
