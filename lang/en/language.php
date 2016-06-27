@@ -8,7 +8,6 @@ $LANG['Add files'] = 'Add files';
 $LANG['Edit files'] = 'Edit files';
 $LANG['Delete files'] = 'Delete files';
 $LANG['Go back'] = 'Go back';
-$LANG['Access forbidden!'] = 'Access forbidden!';
 $LANG['Delete'] = 'Delete';
 $LANG['Update'] = 'Update';
 $LANG['Add'] = 'Add';
