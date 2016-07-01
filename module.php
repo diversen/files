@@ -365,8 +365,7 @@ class module {
         echo $h->getStr();
     }
     
-        /**
-     * Note: All images are public
+    /**
      * Expose images in JSON format
      * @return type
      */
@@ -388,8 +387,7 @@ class module {
                 return false;
             }
         }
-        
-        
+         
         // Get rows
         $rows = $this->getAllFilesInfo(
                 array(
