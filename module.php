@@ -400,8 +400,12 @@ class module {
         foreach ($rows as $key => $val) {
             $rows[$key]['url_m'] = "/files/download/$val[id]/" . strings::utf8SlugString($val['title']);
             $rows[$key]['url_s'] = "/files/download/$val[id]/" . strings::utf8SlugString($val['title']) . "?size=file_thumb";
-            $str = strings::sanitizeUrlRigid(html::specialDecode($val['abstract']));
-            $rows[$key]['title'] = $str; 
+            
+            if (empty($val['abstract'])) {
+                $rows[$key]['title'] = html::specialEncode($val['title']);
+            } else {
+                $rows[$key]['title'] = html::specialEncode($val['abstract']); 
+            }
         }
         
         $files = array ('files' => $rows);
